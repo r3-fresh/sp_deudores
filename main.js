@@ -96,7 +96,11 @@ const startProcess = () => {
     prestamosData.forEach((row, i) => {
       const recordKey = `${row[2]}__${row[8]}__${row[9]}__${row[10]}`;
       if (!almaIndex.has(recordKey)) {
-        returnedItems.push([...row.slice(0, 12), "Sí", new Date(), "Devuelto por el usuario"]);
+        const fecha = row[9].split('/');
+        const mesNumero = fecha[1];
+        const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+        const mesTexto = meses[parseInt(mesNumero) - 1];
+        returnedItems.push([...row.slice(0, 12), "Sí", new Date(), "Devuelto por el usuario", mesTexto, mesNumero]);
         rowsToDelete.push(i + 2);
       }
     });
@@ -174,16 +178,22 @@ const moverARecursosDevueltos = (rowsWithNumbers) => {
 
     const valuesToCopy = rowsData.map(row => {
       const baseData = row.slice(0, 12);
+      const fecha = row[9].split('/');
+      const mesNumero = fecha[1];
+      const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
+      const mesTexto = meses[parseInt(mesNumero) - 1];
       return [
         ...baseData,
         "Sí",
         new Date(),
-        "Proceso automático"
+        "Proceso automático",
+        mesTexto,
+        mesNumero
       ];
     });
 
     const lastRow = SHEETS.recursosDevueltos.getLastRow();
-    SHEETS.recursosDevueltos.getRange(lastRow + 1, 1, valuesToCopy.length, 15)
+    SHEETS.recursosDevueltos.getRange(lastRow + 1, 1, valuesToCopy.length, 17)
       .setValues(valuesToCopy);
 
     rowNumbers.sort((a, b) => b - a).forEach(rowNum => {
