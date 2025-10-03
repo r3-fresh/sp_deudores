@@ -7,7 +7,11 @@ const SHEETS = {
   alma: SS.getSheetByName("Reporte de deudores - Widget"),
   prestamosVencidos: SS.getSheetByName("Préstamos vencidos / Deudores"),
   seguimientoPrestamos: SS.getSheetByName("Seguimiento de préstamos"),
-  recursosDevueltos: SS.getSheetByName("Recursos devueltos / Histórico")
+  recursosDevueltos: SS.getSheetByName("Recursos devueltos / Histórico"),
+  // alma: SS.getSheetByName("Reporte de deudores - Widget"),
+  // prestamosVencidos: SS.getSheetByName("Préstamos vencidos / Deudores"),
+  // seguimientoPrestamos: SS.getSheetByName("Seguimiento de préstamos"),
+  // recursosDevueltos: SS.getSheetByName("Recursos devueltos / Histórico"),
 };
 const AUTHORIZED_USER = "fromeror@continental.edu.pe";
 
