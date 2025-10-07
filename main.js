@@ -57,7 +57,7 @@ const startProcess = () => {
     if (!SHEETS.returnedItems) missingSheets.push(SHEETS.returnedItems.getSheetName());
 
     SpreadsheetApp.getActiveSpreadsheet().toast(
-      `No se encontraron las siguientes hojas:\n\n- ${missingSheets.join("\n- ")}\n\nVerifica los IDs de las hojas.`,
+      `No se encontraron las siguientes hojas: - ${missingSheets.join("\n- ")}. Verifica los IDs de las hojas.`,
       "Error en la configuración ❌",
       5
     );
@@ -114,7 +114,7 @@ const startProcess = () => {
         const mesNumero = fecha[1];
         const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         const mesTexto = meses[parseInt(mesNumero) - 1];
-        returnedItems.push([...row.slice(0, 11), "Sí", new Date(), "Devuelto por el usuario", mesTexto, mesNumero]);
+        returnedItems.push([...row.slice(0, 11), new Date(), "Devuelto por el usuario", mesTexto, mesNumero]);
         rowsToDelete.push(i + 2);
       }
     });
@@ -155,8 +155,8 @@ const startProcess = () => {
     // Resultados
     console.timeEnd("Procesamiento datos");
     const summary = `
-    Total registros previos: ${updates.filter(u => u.value === "YA REGISTRADO").length}\n\n
-    Total nuevos deudores: ${newDebtors.length}\n\n
+    Total registros previos: ${updates.filter(u => u.value === "YA REGISTRADO").length} // 
+    Total nuevos deudores: ${newDebtors.length} // 
     Total ítems devueltos: ${returnedItems.length}
     `;
 
@@ -170,7 +170,7 @@ const startProcess = () => {
   } catch (error) {
     console.error("Error en startProcess:", error);
     SpreadsheetApp.getActiveSpreadsheet().toast(
-      `Ocurrió un error inesperado:\n\n${error.message}`,
+      `Ocurrió un error inesperado: ${error.message}`,
       "Error en el proceso ❌",
       5
     );
@@ -184,7 +184,7 @@ const startProcess = () => {
 /**
  * Mueve registros a Recursos devueltos/Histórico (por lotes)
  */
-const moverAreturnedItems = (rowsWithNumbers) => {
+const moveToReturnedItems = (rowsWithNumbers) => {
   try {
     if (!SHEETS.overdueItems || !SHEETS.returnedItems) {
       SpreadsheetApp.getActiveSpreadsheet().toast(
@@ -206,7 +206,6 @@ const moverAreturnedItems = (rowsWithNumbers) => {
       const mesTexto = meses[parseInt(mesNumero) - 1];
       return [
         ...baseData,
-        "Sí",
         new Date(),
         "Proceso automático",
         mesTexto,
@@ -215,7 +214,7 @@ const moverAreturnedItems = (rowsWithNumbers) => {
     });
 
     const lastRow = SHEETS.returnedItems.getLastRow();
-    SHEETS.returnedItems.getRange(lastRow + 1, 1, valuesToCopy.length, 17)
+    SHEETS.returnedItems.getRange(lastRow + 1, 1, valuesToCopy.length, 15)
       .setValues(valuesToCopy);
 
     rowNumbers.sort((a, b) => b - a).forEach(rowNum => {
@@ -225,9 +224,9 @@ const moverAreturnedItems = (rowsWithNumbers) => {
     return true;
 
   } catch (error) {
-    console.error("Error en moverAreturnedItems:", error);
+    console.error("Error en moveToReturnedItems:", error);
     SpreadsheetApp.getActiveSpreadsheet().toast(
-      `Error moviendo registros a Recursos devueltos:\n${error.message}`,
+      `Error moviendo registros a ${SHEETS.returnedItems.getSheetName()}: ${error.message}`,
       "Error ❌",
       5
     );
@@ -238,7 +237,7 @@ const moverAreturnedItems = (rowsWithNumbers) => {
 /**
  * Mueve registros a Seguimiento de préstamos (por lotes)
  */
-const moverAtrackingItems = (rowsData) => {
+const moveToTrackingItems = (rowsData) => {
   try {
     if (!SHEETS.overdueItems || !SHEETS.trackingItems) {
       SpreadsheetApp.getActiveSpreadsheet().toast(
@@ -252,15 +251,15 @@ const moverAtrackingItems = (rowsData) => {
     const valuesToCopy = rowsData.map(row => row.slice(0, 11));
 
     const lastRow = SHEETS.trackingItems.getLastRow();
-    SHEETS.trackingItems.getRange(lastRow + 1, 1, valuesToCopy.length, 12)
+    SHEETS.trackingItems.getRange(lastRow + 1, 1, valuesToCopy.length, 11)
       .setValues(valuesToCopy);
 
     return true;
 
   } catch (error) {
-    console.error("Error en moverAtrackingItems:", error);
+    console.error("Error en moveToTrackingItems:", error);
     SpreadsheetApp.getActiveSpreadsheet().toast(
-      `Error moviendo registros a seguimiento de préstamos:\n${error.message}`,
+      `Error moviendo registros a ${SHEETS.trackingItems.getSheetName()}: ${error.message}`,
       "Error ❌",
       5
     );
@@ -273,29 +272,29 @@ const moverAtrackingItems = (rowsData) => {
 /**
  * Envía correo de primer recordatorio
  */
-const enviarPrimerRecordatorio = (rows) => {
-  // Implementación pendiente
+const sendFirstReminder = (rows) => {
+  UI.alert("sendFirstReminder" + JSON.stringify(rows))
 };
 
 /**
  * Envía correo de segundo recordatorio
  */
-const enviarSegundoRecordatorio = (rows) => {
-  // Implementación pendiente
+const sendSecondReminder = (rows) => {
+  UI.alert("sendSecondReminder" + JSON.stringify(rows))
 };
 
 /**
  * Envía correo de aviso de recarga
  */
-const enviarAvisoRecarga = (rows) => {
-  // Implementación pendiente
+const sendRechargeNotice = (rows) => {
+  UI.alert("sendRechargeNotice" + JSON.stringify(rows))
 };
 
 /**
  * Envía correo de confirmación de recarga
  */
-const enviarConfirmacionRecarga = (rows) => {
-  // Implementación pendiente
+const sendRechargeConfirmation = (rows) => {
+  UI.alert("sendRechargeConfirmation" + JSON.stringify(rows))
 };
 
 /**
@@ -315,26 +314,26 @@ const executeActions = () => {
   const headers = data.shift();
 
   const ACTION_MAP = {
-    "Enviar correo: Primer recordatorio": enviarPrimerRecordatorio,
-    "Enviar correo: Segundo recordatorio": enviarSegundoRecordatorio,
-    "Enviar correo: Aviso de recarga": enviarAvisoRecarga,
-    "Enviar correo: Confirmación de la recarga": enviarConfirmacionRecarga,
-    "Mover a: Recursos devueltos / Histórico": moverAreturnedItems,
-    "Mover a: Seguimiento de préstamos": moverAtrackingItems
+    "✉️ Primer recordatorio": sendFirstReminder,
+    "✉️ Segundo recordatorio": sendSecondReminder,
+    "✉️ Aviso de recarga": sendRechargeNotice,
+    "✉️ Confirmación de la recarga": sendRechargeConfirmation,
+    "Ítem devuelto/encontrado": moveToReturnedItems,
+    "Dar seguimiento al ítem": moveToTrackingItems
   };
 
   const actionsBatch = {
-    "Enviar correo: Primer recordatorio": [],
-    "Enviar correo: Segundo recordatorio": [],
-    "Enviar correo: Aviso de recarga": [],
-    "Enviar correo: Confirmación de la recarga": [],
-    "Mover a: Recursos devueltos / Histórico": [],
-    "Mover a: Seguimiento de préstamos": []
+    "✉️ Primer recordatorio": [],
+    "✉️ Segundo recordatorio": [],
+    "✉️ Aviso de recarga": [],
+    "✉️ Confirmación de la recarga": [],
+    "Ítem devuelto/encontrado": [],
+    "Dar seguimiento al ítem": []
   };
 
   data.forEach((row, index) => {
     const rowNumber = index + 2;
-    const actionValue = row[13];
+    const actionValue = row[11];
 
     if (actionValue && ACTION_MAP[actionValue]) {
       actionsBatch[actionValue].push({
@@ -344,48 +343,42 @@ const executeActions = () => {
     }
   });
 
-  let processedCount = 0;
-
-  if (actionsBatch["Mover a: Recursos devueltos / Histórico"].length > 0) {
-    const batch = actionsBatch["Mover a: Recursos devueltos / Histórico"];
+  if (actionsBatch["Ítem devuelto/encontrado"].length > 0) {
+    const batch = actionsBatch["Ítem devuelto/encontrado"];
     const rowsToProcess = batch.map(item => [...item.data, item.rowNumber]);
 
-    if (moverAreturnedItems(rowsToProcess)) {
-      processedCount += batch.length;
+    if (moveToReturnedItems(rowsToProcess)) {
       console.log(`Movidos ${batch.length} registros a Recursos devueltos`);
     }
   }
 
-  if (actionsBatch["Mover a: Seguimiento de préstamos"].length > 0) {
-    const batch = actionsBatch["Mover a: Seguimiento de préstamos"];
+  if (actionsBatch["Dar seguimiento al ítem"].length > 0) {
+    const batch = actionsBatch["Dar seguimiento al ítem"];
     const rowsToProcess = batch.map(item => item.data);
 
-    if (moverAtrackingItems(rowsToProcess)) {
-      processedCount += batch.length;
+    if (moveToTrackingItems(rowsToProcess)) {
       console.log(`Movidos ${batch.length} registros a Seguimiento de préstamos`);
     }
   }
 
-  ["Enviar correo: Primer recordatorio", "Enviar correo: Segundo recordatorio", "Enviar correo: Recarga de pensión"].forEach(action => {
+  ["✉️ Primer recordatorio", "✉️ Segundo recordatorio", "✉️ Aviso de recarga", "✉️ Confirmación de la recarga"].forEach(action => {
     if (actionsBatch[action].length > 0) {
       const batch = actionsBatch[action];
       batch.forEach(item => {
         ACTION_MAP[action](item.data, item.rowNumber);
       });
-      processedCount += batch.length;
       console.log(`Procesados ${batch.length} ${action}`);
     }
   });
 
   const summary = `Proceso completado:\n\n` +
-    `- Movidos a Recursos devueltos: ${actionsBatch["Mover a: Recursos devueltos / Histórico"].length}\n` +
-    `- Movidos a Seguimiento: ${actionsBatch["Mover a: Seguimiento de préstamos"].length}\n` +
-    `- Correos enviados: ${actionsBatch["Enviar correo: Primer recordatorio"].length +
-    actionsBatch["Enviar correo: Segundo recordatorio"].length +
-    actionsBatch["Enviar correo: Aviso de recarga"].length +
-    actionsBatch["Enviar correo: Confirmación de la recarga"].length
-    }\n` +
-    `\nTotal acciones: ${processedCount}`;
+    `- Movidos a Recursos devueltos: ${actionsBatch["Ítem devuelto/encontrado"].length} // ` +
+    `- Movidos a Seguimiento: ${actionsBatch["Dar seguimiento al ítem"].length} // ` +
+    `- Correos enviados: ${actionsBatch["✉️ Primer recordatorio"].length +
+    actionsBatch["✉️ Segundo recordatorio"].length +
+    actionsBatch["✉️ Aviso de recarga"].length +
+    actionsBatch["✉️ Confirmación de la recarga"].length
+    }`;
 
   SpreadsheetApp.getActiveSpreadsheet().toast(
     summary,
@@ -407,10 +400,10 @@ const hasScript = () => {
  */
 const onOpen = () => {
   UI.createMenu('Scripts 🟢')
-    .addItem('➡️ Procesar datos de ' + SHEETS.alma.getSheetName(), 'startProcess')
-    .addItem('🧪 Ejecutar acciones (N) de ' + SHEETS.overdueItems.getSheetName(), 'executeActions')
+    .addItem('➡️ Procesar datos de: ' + SHEETS.alma.getSheetName(), 'startProcess')
+    .addItem('🧪 Ejecutar acciones (L) de: ' + SHEETS.overdueItems.getSheetName(), 'executeActions')
     .addSeparator()
-    .addItem('🗑️ Borrar datos de ' + SHEETS.alma.getSheetName(), 'deleteData') // ✅
+    .addItem('🗑️ Borrar datos de: ' + SHEETS.alma.getSheetName(), 'deleteData') // ✅
     .addSeparator()
     .addItem('⚠️ Información del script', 'hasScript') // ✅
     .addToUi();
