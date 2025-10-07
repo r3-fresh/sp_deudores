@@ -5,9 +5,9 @@ const UI = SpreadsheetApp.getUi();
 const SS = SpreadsheetApp.getActiveSpreadsheet();
 const SHEETS = {
   alma: SS.getSheetById(563966915),
-  prestamosVencidos: SS.getSheetById(491373272),
-  seguimientoPrestamos: SS.getSheetById(687630222),
-  recursosDevueltos: SS.getSheetById(1634827826),
+  overdueItems: SS.getSheetById(491373272),
+  trackingItems: SS.getSheetById(687630222),
+  returnedItems: SS.getSheetById(1634827826),
 };
 
 // **********************************************
@@ -50,14 +50,14 @@ const deleteData = () => {
  */
 const startProcess = () => {
   // Validación inicial de hojas
-  if (!SHEETS.alma || !SHEETS.prestamosVencidos || !SHEETS.recursosDevueltos) {
+  if (!SHEETS.alma || !SHEETS.overdueItems || !SHEETS.returnedItems) {
     const missingSheets = [];
-    if (!SHEETS.alma) missingSheets.push("Reporte de deudores - Widget");
-    if (!SHEETS.prestamosVencidos) missingSheets.push("Préstamos vencidos / Deudores");
-    if (!SHEETS.recursosDevueltos) missingSheets.push("Recursos devueltos / Histórico");
+    if (!SHEETS.alma) missingSheets.push(SHEETS.alma.getSheetName());
+    if (!SHEETS.overdueItems) missingSheets.push(SHEETS.overdueItems.getSheetName());
+    if (!SHEETS.returnedItems) missingSheets.push(SHEETS.returnedItems.getSheetName());
 
     SpreadsheetApp.getActiveSpreadsheet().toast(
-      `No se encontraron las siguientes hojas:\n\n- ${missingSheets.join("\n- ")}\n\nVerifica los nombres de las hojas.`,
+      `No se encontraron las siguientes hojas:\n\n- ${missingSheets.join("\n- ")}\n\nVerifica los IDs de las hojas.`,
       "Error en la configuración ❌",
       5
     );
@@ -78,11 +78,11 @@ const startProcess = () => {
 
     // Carga de datos en memoria
     const [almaHeaders, ...almaData] = SHEETS.alma.getDataRange().getValues();
-    const [prestamosHeaders, ...prestamosData] = SHEETS.prestamosVencidos.getDataRange().getValues();
+    const [overdueHeaders, ...overdueData] = SHEETS.overdueItems.getDataRange().getValues();
 
     // Crear índices para búsquedas rápidas
-    const prestamoIndex = new Set(
-      prestamosData.map(row => `${row[2]}__${row[8]}__${row[9]}__${row[10]}`)
+    const overdueIndex = new Set(
+      overdueData.map(row => `${row[2]}__${row[8]}__${row[9]}__${row[10]}`)
     );
 
     // Procesamiento de datos
@@ -93,28 +93,28 @@ const startProcess = () => {
 
     almaData.forEach((row, i) => {
       const recordKey = `${row[2]}__${row[8]}__${row[9]}__${row[10]}`;
-      const isRegistered = prestamoIndex.has(recordKey);
+      const isRegistered = overdueIndex.has(recordKey);
 
       updates.push({
         row: i + 2,
         value: isRegistered ? "YA REGISTRADO" : "NUEVO DEUDOR"
       });
 
-      if (!isRegistered) newDebtors.push(row.slice(0, 12));
+      if (!isRegistered) newDebtors.push(row.slice(0, 11));
     });
 
     const almaIndex = new Set(
       almaData.map(row => `${row[2]}__${row[8]}__${row[9]}__${row[10]}`)
     );
 
-    prestamosData.forEach((row, i) => {
+    overdueData.forEach((row, i) => {
       const recordKey = `${row[2]}__${row[8]}__${row[9]}__${row[10]}`;
       if (!almaIndex.has(recordKey)) {
         const fecha = row[9].split('/');
         const mesNumero = fecha[1];
         const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
         const mesTexto = meses[parseInt(mesNumero) - 1];
-        returnedItems.push([...row.slice(0, 12), "Sí", new Date(), "Devuelto por el usuario", mesTexto, mesNumero]);
+        returnedItems.push([...row.slice(0, 11), "Sí", new Date(), "Devuelto por el usuario", mesTexto, mesNumero]);
         rowsToDelete.push(i + 2);
       }
     });
@@ -131,44 +131,48 @@ const startProcess = () => {
         outputValues[update.row - firstRow] = [update.value];
       });
 
-      SHEETS.alma.getRange(firstRow, 13, rowCount, 1).setValues(outputValues);
+      SHEETS.alma.getRange(firstRow, 12, rowCount, 1).setValues(outputValues);
     }
 
     if (newDebtors.length) {
-      SHEETS.prestamosVencidos.getRange(
-        SHEETS.prestamosVencidos.getLastRow() + 1, 1,
+      SHEETS.overdueItems.getRange(
+        SHEETS.overdueItems.getLastRow() + 1, 1,
         newDebtors.length, newDebtors[0].length
       ).setValues(newDebtors);
     }
 
     if (returnedItems.length) {
-      SHEETS.recursosDevueltos.getRange(
-        SHEETS.recursosDevueltos.getLastRow() + 1, 1,
+      SHEETS.returnedItems.getRange(
+        SHEETS.returnedItems.getLastRow() + 1, 1,
         returnedItems.length, returnedItems[0].length
       ).setValues(returnedItems);
 
       rowsToDelete.sort((a, b) => b - a).forEach(row => {
-        SHEETS.prestamosVencidos.deleteRow(row);
+        SHEETS.overdueItems.deleteRow(row);
       });
     }
 
     // Resultados
     console.timeEnd("Procesamiento datos");
     const summary = `
-    Total registros previos: ${updates.filter(u => u.value === "YA REGISTRADO").length}
-    Total nuevos deudores: ${newDebtors.length}
+    Total registros previos: ${updates.filter(u => u.value === "YA REGISTRADO").length}\n\n
+    Total nuevos deudores: ${newDebtors.length}\n\n
     Total ítems devueltos: ${returnedItems.length}
     `;
 
     console.log(summary);
-    UI.alert("Resumen del Proceso", summary, UI.ButtonSet.OK);
+    SpreadsheetApp.getActiveSpreadsheet().toast(
+      summary,
+      "Resumen del proceso ✅",
+      15
+    );
 
   } catch (error) {
     console.error("Error en startProcess:", error);
-    UI.alert(
-      "Error en el proceso",
+    SpreadsheetApp.getActiveSpreadsheet().toast(
       `Ocurrió un error inesperado:\n\n${error.message}`,
-      UI.ButtonSet.OK
+      "Error en el proceso ❌",
+      5
     );
   }
 };
@@ -180,10 +184,14 @@ const startProcess = () => {
 /**
  * Mueve registros a Recursos devueltos/Histórico (por lotes)
  */
-const moverARecursosDevueltos = (rowsWithNumbers) => {
+const moverAreturnedItems = (rowsWithNumbers) => {
   try {
-    if (!SHEETS.prestamosVencidos || !SHEETS.recursosDevueltos) {
-      UI.alert("Error", "No se encontraron las hojas requeridas", UI.ButtonSet.OK);
+    if (!SHEETS.overdueItems || !SHEETS.returnedItems) {
+      SpreadsheetApp.getActiveSpreadsheet().toast(
+        "No se encontraron las hojas requeridas",
+        "Error ❌",
+        5
+      );
       return false;
     }
 
@@ -191,7 +199,7 @@ const moverARecursosDevueltos = (rowsWithNumbers) => {
     const rowNumbers = rowsWithNumbers.map(row => row[row.length - 1]);
 
     const valuesToCopy = rowsData.map(row => {
-      const baseData = row.slice(0, 12);
+      const baseData = row.slice(0, 11);
       const fecha = row[9].split('/');
       const mesNumero = fecha[1];
       const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
@@ -206,22 +214,22 @@ const moverARecursosDevueltos = (rowsWithNumbers) => {
       ];
     });
 
-    const lastRow = SHEETS.recursosDevueltos.getLastRow();
-    SHEETS.recursosDevueltos.getRange(lastRow + 1, 1, valuesToCopy.length, 17)
+    const lastRow = SHEETS.returnedItems.getLastRow();
+    SHEETS.returnedItems.getRange(lastRow + 1, 1, valuesToCopy.length, 17)
       .setValues(valuesToCopy);
 
     rowNumbers.sort((a, b) => b - a).forEach(rowNum => {
-      SHEETS.prestamosVencidos.deleteRow(rowNum);
+      SHEETS.overdueItems.deleteRow(rowNum);
     });
 
     return true;
 
   } catch (error) {
-    console.error("Error en moverARecursosDevueltos:", error);
-    UI.alert(
-      "Error",
+    console.error("Error en moverAreturnedItems:", error);
+    SpreadsheetApp.getActiveSpreadsheet().toast(
       `Error moviendo registros a Recursos devueltos:\n${error.message}`,
-      UI.ButtonSet.OK
+      "Error ❌",
+      5
     );
     return false;
   }
@@ -230,27 +238,31 @@ const moverARecursosDevueltos = (rowsWithNumbers) => {
 /**
  * Mueve registros a Seguimiento de préstamos (por lotes)
  */
-const moverASeguimientoPrestamos = (rowsData) => {
+const moverAtrackingItems = (rowsData) => {
   try {
-    if (!SHEETS.prestamosVencidos || !SHEETS.seguimientoPrestamos) {
-      UI.alert("Error", "No se encontraron las hojas requeridas", UI.ButtonSet.OK);
+    if (!SHEETS.overdueItems || !SHEETS.trackingItems) {
+      SpreadsheetApp.getActiveSpreadsheet().toast(
+        "No se encontraron las hojas requeridas",
+        "Error ❌",
+        5
+      );
       return false;
     }
 
-    const valuesToCopy = rowsData.map(row => row.slice(0, 12));
+    const valuesToCopy = rowsData.map(row => row.slice(0, 11));
 
-    const lastRow = SHEETS.seguimientoPrestamos.getLastRow();
-    SHEETS.seguimientoPrestamos.getRange(lastRow + 1, 1, valuesToCopy.length, 12)
+    const lastRow = SHEETS.trackingItems.getLastRow();
+    SHEETS.trackingItems.getRange(lastRow + 1, 1, valuesToCopy.length, 12)
       .setValues(valuesToCopy);
 
     return true;
 
   } catch (error) {
-    console.error("Error en moverASeguimientoPrestamos:", error);
-    UI.alert(
-      "Error",
-      `Error moviendo registros a Seguimiento de préstamos:\n${error.message}`,
-      UI.ButtonSet.OK
+    console.error("Error en moverAtrackingItems:", error);
+    SpreadsheetApp.getActiveSpreadsheet().toast(
+      `Error moviendo registros a seguimiento de préstamos:\n${error.message}`,
+      "Error ❌",
+      5
     );
     return false;
   }
@@ -290,12 +302,16 @@ const enviarConfirmacionRecarga = (rows) => {
  * Ejecuta acciones basadas en los valores de la columna N (14)
  */
 const executeActions = () => {
-  if (!SHEETS.prestamosVencidos) {
-    UI.alert("Error", "No se encontró la hoja 'Préstamos vencidos / Deudores'", UI.ButtonSet.OK);
+  if (!SHEETS.overdueItems) {
+    SpreadsheetApp.getActiveSpreadsheet().toast(
+      "No se encontró la hoja 'Préstamos vencidos / Deudores'",
+      "Error ❌",
+      5
+    );
     return;
   }
 
-  const data = SHEETS.prestamosVencidos.getDataRange().getValues();
+  const data = SHEETS.overdueItems.getDataRange().getValues();
   const headers = data.shift();
 
   const ACTION_MAP = {
@@ -303,8 +319,8 @@ const executeActions = () => {
     "Enviar correo: Segundo recordatorio": enviarSegundoRecordatorio,
     "Enviar correo: Aviso de recarga": enviarAvisoRecarga,
     "Enviar correo: Confirmación de la recarga": enviarConfirmacionRecarga,
-    "Mover a: Recursos devueltos / Histórico": moverARecursosDevueltos,
-    "Mover a: Seguimiento de préstamos": moverASeguimientoPrestamos
+    "Mover a: Recursos devueltos / Histórico": moverAreturnedItems,
+    "Mover a: Seguimiento de préstamos": moverAtrackingItems
   };
 
   const actionsBatch = {
@@ -334,7 +350,7 @@ const executeActions = () => {
     const batch = actionsBatch["Mover a: Recursos devueltos / Histórico"];
     const rowsToProcess = batch.map(item => [...item.data, item.rowNumber]);
 
-    if (moverARecursosDevueltos(rowsToProcess)) {
+    if (moverAreturnedItems(rowsToProcess)) {
       processedCount += batch.length;
       console.log(`Movidos ${batch.length} registros a Recursos devueltos`);
     }
@@ -344,7 +360,7 @@ const executeActions = () => {
     const batch = actionsBatch["Mover a: Seguimiento de préstamos"];
     const rowsToProcess = batch.map(item => item.data);
 
-    if (moverASeguimientoPrestamos(rowsToProcess)) {
+    if (moverAtrackingItems(rowsToProcess)) {
       processedCount += batch.length;
       console.log(`Movidos ${batch.length} registros a Seguimiento de préstamos`);
     }
@@ -371,7 +387,11 @@ const executeActions = () => {
     }\n` +
     `\nTotal acciones: ${processedCount}`;
 
-  UI.alert("Resumen de ejecución", summary, UI.ButtonSet.OK);
+  SpreadsheetApp.getActiveSpreadsheet().toast(
+    summary,
+    "Resumen de ejecución ✅",
+    15
+  );
 };
 
 const hasScript = () => {
@@ -388,10 +408,10 @@ const hasScript = () => {
 const onOpen = () => {
   UI.createMenu('Scripts 🟢')
     .addItem('➡️ Procesar datos de ' + SHEETS.alma.getSheetName(), 'startProcess')
-    .addItem('🧪 Ejecutar acciones (N) de ' + SHEETS.prestamosVencidos.getSheetName(), 'executeActions')
+    .addItem('🧪 Ejecutar acciones (N) de ' + SHEETS.overdueItems.getSheetName(), 'executeActions')
     .addSeparator()
-    .addItem('🗑️ Borrar datos de ' + SHEETS.alma.getSheetName(), 'deleteData')
+    .addItem('🗑️ Borrar datos de ' + SHEETS.alma.getSheetName(), 'deleteData') // ✅
     .addSeparator()
-    .addItem('⚠️ Información del script', 'hasScript')
+    .addItem('⚠️ Información del script', 'hasScript') // ✅
     .addToUi();
 };
