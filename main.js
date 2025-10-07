@@ -4,16 +4,11 @@
 const UI = SpreadsheetApp.getUi();
 const SS = SpreadsheetApp.getActiveSpreadsheet();
 const SHEETS = {
-  alma: SS.getSheetByName("Reporte de deudores - Widget"),
-  prestamosVencidos: SS.getSheetByName("Préstamos vencidos / Deudores"),
-  seguimientoPrestamos: SS.getSheetByName("Seguimiento de préstamos"),
-  recursosDevueltos: SS.getSheetByName("Recursos devueltos / Histórico"),
-  // alma: SS.getSheetByName("Reporte de deudores - Widget"),
-  // prestamosVencidos: SS.getSheetByName("Préstamos vencidos / Deudores"),
-  // seguimientoPrestamos: SS.getSheetByName("Seguimiento de préstamos"),
-  // recursosDevueltos: SS.getSheetByName("Recursos devueltos / Histórico"),
+  alma: SS.getSheetById(563966915),
+  prestamosVencidos: SS.getSheetById(491373272),
+  seguimientoPrestamos: SS.getSheetById(687630222),
+  recursosDevueltos: SS.getSheetById(1634827826),
 };
-const AUTHORIZED_USER = "fromeror@continental.edu.pe";
 
 // **********************************************
 // FUNCIONES PRINCIPALES
@@ -22,21 +17,32 @@ const AUTHORIZED_USER = "fromeror@continental.edu.pe";
 /**
  * Prepara la hoja para nuevos datos limpiando contenido previo
  */
-const resetSheetForNewData = () => {
+const deleteData = () => {
   if (!SHEETS.alma) {
-    UI.alert('Error', 'Hoja "Reporte de deudores - Widget" no encontrada', UI.ButtonSet.OK);
+    SpreadsheetApp.getActiveSpreadsheet().toast(
+      `No se encontró la hoja ${SHEETS.alma.getSheetName()}.`,
+      "Error en la configuración ❌",
+      5
+    );
     return;
   }
 
   const lastRow = SHEETS.alma.getLastRow();
   if (lastRow < 2) {
-    UI.alert('Info', 'La hoja ya está vacía', UI.ButtonSet.OK);
+    SpreadsheetApp.getActiveSpreadsheet().toast(
+      `La hoja ${SHEETS.alma.getSheetName()} ya se encuentra vacía.`,
+      "Información ⚠️",
+      5
+    );
     return;
   }
 
-  SHEETS.alma.getRange(`A2:M${lastRow}`).clearContent();
-  SpreadsheetApp.flush();
-  UI.alert('Éxito', `Se limpiaron ${lastRow - 1} filas`, UI.ButtonSet.OK);
+  SHEETS.alma.getRange(`A2:L${lastRow}`).clearContent();
+  SpreadsheetApp.getActiveSpreadsheet().toast(
+    `Se limpiaron ${lastRow - 1} filas de la hoja ${SHEETS.alma.getSheetName()}.`,
+    "Éxito ✅",
+    5
+  );
 };
 
 /**
@@ -50,10 +56,10 @@ const startProcess = () => {
     if (!SHEETS.prestamosVencidos) missingSheets.push("Préstamos vencidos / Deudores");
     if (!SHEETS.recursosDevueltos) missingSheets.push("Recursos devueltos / Histórico");
 
-    UI.alert(
-      "Error de configuración",
+    SpreadsheetApp.getActiveSpreadsheet().toast(
       `No se encontraron las siguientes hojas:\n\n- ${missingSheets.join("\n- ")}\n\nVerifica los nombres de las hojas.`,
-      UI.ButtonSet.OK
+      "Error en la configuración ❌",
+      5
     );
     return;
   }
@@ -62,7 +68,11 @@ const startProcess = () => {
     console.time("Procesamiento datos");
 
     if (SHEETS.alma.getRange('A2').getValue() === "") {
-      UI.alert("Información", "No hay datos para procesar.", UI.ButtonSet.OK);
+      SpreadsheetApp.getActiveSpreadsheet().toast(
+        `No hay datos para procesar en ${SHEETS.alma.getSheetName()}.`,
+        "Error en los datos ❌",
+        5
+      );
       return;
     }
 
@@ -354,16 +364,19 @@ const executeActions = () => {
   const summary = `Proceso completado:\n\n` +
     `- Movidos a Recursos devueltos: ${actionsBatch["Mover a: Recursos devueltos / Histórico"].length}\n` +
     `- Movidos a Seguimiento: ${actionsBatch["Mover a: Seguimiento de préstamos"].length}\n` +
-    `- Correos enviados: ${
-      actionsBatch["Enviar correo: Primer recordatorio"].length + 
-      actionsBatch["Enviar correo: Segundo recordatorio"].length + 
-      actionsBatch["Enviar correo: Aviso de recarga"].length +
-      actionsBatch["Enviar correo: Confirmación de la recarga"].length
+    `- Correos enviados: ${actionsBatch["Enviar correo: Primer recordatorio"].length +
+    actionsBatch["Enviar correo: Segundo recordatorio"].length +
+    actionsBatch["Enviar correo: Aviso de recarga"].length +
+    actionsBatch["Enviar correo: Confirmación de la recarga"].length
     }\n` +
     `\nTotal acciones: ${processedCount}`;
 
   UI.alert("Resumen de ejecución", summary, UI.ButtonSet.OK);
 };
+
+const hasScript = () => {
+  UI.alert("Información ⚠️", "Script: SP | Reporte de deudores", UI.ButtonSet.OK);
+}
 
 // **********************************************
 // MENÚ
@@ -373,19 +386,12 @@ const executeActions = () => {
  * Crea el menú personalizado
  */
 const onOpen = () => {
-  const menu = UI.createMenu('Scripts 🟢')
-    .addItem('🔄 Procesar reporte de Alma', 'startProcess')
-    .addItem('⚡ Ejecutar acciones por ítem', 'executeActions')
+  UI.createMenu('Scripts 🟢')
+    .addItem('➡️ Procesar datos de ' + SHEETS.alma.getSheetName(), 'startProcess')
+    .addItem('🧪 Ejecutar acciones (N) de ' + SHEETS.prestamosVencidos.getSheetName(), 'executeActions')
     .addSeparator()
-    .addItem('🗑️ Limpiar información', 'resetSheetForNewData');
-
-  if (Session.getActiveUser().getEmail() === AUTHORIZED_USER) {
-    menu
-      .addSeparator()
-      .addSubMenu(UI.createMenu('⚙️ Avanzado')
-        .addItem('Mover a: Seguimiento de préstamos', 'moverASeguimientoPrestamos')
-        .addItem('Mover a: Recursos devueltos', 'moverARecursosDevueltos'));
-  }
-
-  menu.addToUi();
+    .addItem('🗑️ Borrar datos de ' + SHEETS.alma.getSheetName(), 'deleteData')
+    .addSeparator()
+    .addItem('⚠️ Información del script', 'hasScript')
+    .addToUi();
 };
