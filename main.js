@@ -110,11 +110,13 @@ const startProcess = () => {
     overdueData.forEach((row, i) => {
       const recordKey = `${row[2]}__${row[8]}__${row[9]}__${row[10]}`;
       if (!almaIndex.has(recordKey)) {
-        const fecha = row[9].split('/');
-        const mesNumero = fecha[1];
-        const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-        const mesTexto = meses[parseInt(mesNumero) - 1];
-        returnedItems.push([...row.slice(0, 11), new Date(), "Devuelto por el usuario", mesTexto, mesNumero]);
+        // Obtener la bitácora actual de acciones (columna 12)
+        const logInfo = row[12] || "";
+        const actionMessage = logInfo
+          ? `${logInfo}\n${new Date().toLocaleString()}: Devuelto por el usuario`
+          : `${new Date().toLocaleString()}: Devuelto por el usuario`;
+
+        returnedItems.push([...row.slice(0, 11), new Date(), actionMessage]);
         rowsToDelete.push(i + 2);
       }
     });
@@ -147,6 +149,7 @@ const startProcess = () => {
         returnedItems.length, returnedItems[0].length
       ).setValues(returnedItems);
 
+      // Ordenamos de mayor a menor para no afectar los índices al eliminar
       rowsToDelete.sort((a, b) => b - a).forEach(row => {
         SHEETS.overdueItems.deleteRow(row);
       });
@@ -155,9 +158,9 @@ const startProcess = () => {
     // Resultados
     console.timeEnd("Procesamiento datos");
     const summary = `
-    Total registros previos: ${updates.filter(u => u.value === "YA REGISTRADO").length} // 
-    Total nuevos deudores: ${newDebtors.length} // 
-    Total ítems devueltos: ${returnedItems.length}
+    Registros previos: ${updates.filter(u => u.value === "YA REGISTRADO").length} // 
+    Nuevos deudores: ${newDebtors.length} // 
+    Ítems devueltos: ${returnedItems.length}
     `;
 
     console.log(summary);
@@ -198,23 +201,27 @@ const moveToReturnedItems = (rowsWithNumbers) => {
     const rowsData = rowsWithNumbers.map(row => row.slice(0, -1));
     const rowNumbers = rowsWithNumbers.map(row => row[row.length - 1]);
 
-    const valuesToCopy = rowsData.map(row => {
+    const valuesToCopy = rowsData.map((row, index) => {
       const baseData = row.slice(0, 11);
-      const fecha = row[9].split('/');
-      const mesNumero = fecha[1];
-      const meses = ['Enero', 'Febrero', 'Marzo', 'Abril', 'Mayo', 'Junio', 'Julio', 'Agosto', 'Septiembre', 'Octubre', 'Noviembre', 'Diciembre'];
-      const mesTexto = meses[parseInt(mesNumero) - 1];
+      const rowNumber = rowNumbers[index];
+
+      // Obtener la bitácora actual de acciones
+      let logInfo = SHEETS.overdueItems.getRange(rowNumber, 13).getValue();
+
+      // Si no hay bitácora, usar un mensaje predeterminado
+      const actionMessage = logInfo
+        ? `${logInfo}\n${new Date().toLocaleString()}: Ítem devuelto por ejecución de acciones`
+        : `${new Date().toLocaleString()}: Ítem devuelto por ejecución de acciones`;
+
       return [
         ...baseData,
         new Date(),
-        "Proceso automático",
-        mesTexto,
-        mesNumero
+        actionMessage
       ];
     });
 
     const lastRow = SHEETS.returnedItems.getLastRow();
-    SHEETS.returnedItems.getRange(lastRow + 1, 1, valuesToCopy.length, 15)
+    SHEETS.returnedItems.getRange(lastRow + 1, 1, valuesToCopy.length, 13)
       .setValues(valuesToCopy);
 
     rowNumbers.sort((a, b) => b - a).forEach(rowNum => {
@@ -237,7 +244,7 @@ const moveToReturnedItems = (rowsWithNumbers) => {
 /**
  * Mueve registros a Seguimiento de préstamos (por lotes)
  */
-const moveToTrackingItems = (rowsData) => {
+const moveToTrackingItems = (rowsWithNumbers) => {
   try {
     if (!SHEETS.overdueItems || !SHEETS.trackingItems) {
       SpreadsheetApp.getActiveSpreadsheet().toast(
@@ -248,10 +255,33 @@ const moveToTrackingItems = (rowsData) => {
       return false;
     }
 
-    const valuesToCopy = rowsData.map(row => row.slice(0, 11));
+    const rowsData = rowsWithNumbers.map(row => row.slice(0, -1));
+    const rowNumbers = rowsWithNumbers.map(row => row[row.length - 1]);
+
+    const valuesToCopy = rowsData.map((row, index) => {
+      const baseData = row.slice(0, 11);
+      const rowNumber = rowNumbers[index];
+
+      // Obtener la bitácora actual de acciones
+      let logInfo = SHEETS.overdueItems.getRange(rowNumber, 13).getValue();
+
+      // Si no hay bitácora, usar un mensaje predeterminado
+      const actionMessage = logInfo
+        ? `${logInfo}\n${new Date().toLocaleString()}: Ítem movido a Seguimiento`
+        : `${new Date().toLocaleString()}: Ítem movido a Seguimiento`;
+
+      // Limpiar la celda de acción después de ejecutar
+      SHEETS.overdueItems.getRange(rowNumber, 12).clearContent();
+
+      return [
+        ...baseData,
+        new Date(), // Fecha de seguimiento (actual)
+        actionMessage
+      ];
+    });
 
     const lastRow = SHEETS.trackingItems.getLastRow();
-    SHEETS.trackingItems.getRange(lastRow + 1, 1, valuesToCopy.length, 11)
+    SHEETS.trackingItems.getRange(lastRow + 1, 1, valuesToCopy.length, 13)
       .setValues(valuesToCopy);
 
     return true;
@@ -270,31 +300,66 @@ const moveToTrackingItems = (rowsData) => {
 // TODO: Implementar acciones
 
 /**
+ * Actualiza la bitácora de acciones en la columna 12
+ * @param {number} rowNumber - Número de fila a actualizar
+ * @param {string} action - Acción realizada
+ * @param {string} currentLog - Bitácora actual (si existe)
+ * @returns {string} - Nueva bitácora
+ */
+const updateActionLog = (rowNumber, action, currentLog = "") => {
+  const timestamp = new Date().toLocaleString();
+  const newLogEntry = `${timestamp}: ${action}`;
+
+  // Si ya existe una bitácora, añadir la nueva acción
+  const updatedLog = currentLog ? `${currentLog}\n${newLogEntry}` : newLogEntry;
+
+  // Actualizar la celda de bitácora (columna 13)
+  SHEETS.overdueItems.getRange(rowNumber, 13).setValue(updatedLog);
+
+  // Borrar la acción de la columna 12
+  SHEETS.overdueItems.getRange(rowNumber, 12).clearContent();
+
+  return updatedLog;
+};
+
+/**
  * Envía correo de primer recordatorio
  */
-const sendFirstReminder = (rows) => {
-  UI.alert("sendFirstReminder" + JSON.stringify(rows))
+const sendFirstReminder = (data, rowNumber) => {
+
+  // Actualizar bitácora
+  const currentLog = SHEETS.overdueItems.getRange(rowNumber, 13).getValue();
+  updateActionLog(rowNumber, "Enviado primer recordatorio", currentLog);
 };
 
 /**
  * Envía correo de segundo recordatorio
  */
-const sendSecondReminder = (rows) => {
-  UI.alert("sendSecondReminder" + JSON.stringify(rows))
+const sendSecondReminder = (data, rowNumber) => {
+
+  // Actualizar bitácora
+  const currentLog = SHEETS.overdueItems.getRange(rowNumber, 13).getValue();
+  updateActionLog(rowNumber, "Enviado segundo recordatorio", currentLog);
 };
 
 /**
  * Envía correo de aviso de recarga
  */
-const sendRechargeNotice = (rows) => {
-  UI.alert("sendRechargeNotice" + JSON.stringify(rows))
+const sendRechargeNotice = (data, rowNumber) => {
+
+  // Actualizar bitácora
+  const currentLog = SHEETS.overdueItems.getRange(rowNumber, 13).getValue();
+  updateActionLog(rowNumber, "Enviado aviso de recarga", currentLog);
 };
 
 /**
  * Envía correo de confirmación de recarga
  */
-const sendRechargeConfirmation = (rows) => {
-  UI.alert("sendRechargeConfirmation" + JSON.stringify(rows))
+const sendRechargeConfirmation = (data, rowNumber) => {
+
+  // Actualizar bitácora
+  const currentLog = SHEETS.overdueItems.getRange(rowNumber, 13).getValue();
+  updateActionLog(rowNumber, "Enviada confirmación de recarga", currentLog);
 };
 
 /**
@@ -371,9 +436,8 @@ const executeActions = () => {
     }
   });
 
-  const summary = `Proceso completado:\n\n` +
-    `- Movidos a Recursos devueltos: ${actionsBatch["Ítem devuelto/encontrado"].length} // ` +
-    `- Movidos a Seguimiento: ${actionsBatch["Dar seguimiento al ítem"].length} // ` +
+  const summary = `- Ítems devueltos: ${actionsBatch["Ítem devuelto/encontrado"].length} // ` +
+    `- Ítems en seguimiento: ${actionsBatch["Dar seguimiento al ítem"].length} // ` +
     `- Correos enviados: ${actionsBatch["✉️ Primer recordatorio"].length +
     actionsBatch["✉️ Segundo recordatorio"].length +
     actionsBatch["✉️ Aviso de recarga"].length +
