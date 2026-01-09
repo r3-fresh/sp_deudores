@@ -88,7 +88,9 @@ const startProcess = () => {
             });
 
             if (!isRegistered) {
-                newDebtors.push(row.slice(0, COLUMNS.ACTION));
+                // Copiar las primeras 11 columnas (Campus hasta Fecha de Vencimiento)
+                // Las columnas 11-16 se dejan vacías para overdueItems
+                newDebtors.push(row.slice(0, 11));
             }
         });
 
@@ -102,16 +104,35 @@ const startProcess = () => {
 
             if (!almaIndex.has(recordKey)) {
                 const currentLog = row[COLUMNS.LOG] || "";
+                const timestamp = new Date().toLocaleString("es-PE", {
+                    timeZone: "America/Lima",
+                    year: "numeric",
+                    month: "2-digit",
+                    day: "2-digit",
+                    hour: "2-digit",
+                    minute: "2-digit",
+                });
+
                 const actionMessage = currentLog
-                    ? `${currentLog}\n${new Date().toLocaleString()}: Devuelto por el usuario`
-                    : `${new Date().toLocaleString()}: Devuelto por el usuario`;
+                    ? `${currentLog}\n${timestamp}: Devuelto por el usuario`
+                    : `${timestamp}: Devuelto por el usuario`;
 
-                returnedItems.push([
-                    ...row.slice(0, COLUMNS.ACTION),
-                    new Date(),
-                    actionMessage,
-                ]);
+                // Copiar todas las columnas de overdueItems (17 columnas)
+                // Luego agregar columnas específicas de returnedItems
+                const returnedRow = [
+                    ...row.slice(0, 11),      // Campus hasta Fecha de Vencimiento
+                    new Date(),                // Fecha de devolución
+                    actionMessage,             // Bitácora actualizada
+                    row[COLUMNS.RECHARGE_DATE] || "",    // Fecha de recargo
+                    row[COLUMNS.WITHDRAWAL_DATE] || "",  // Fecha de retiro
+                    row[COLUMNS.COST] || "",             // Costo
+                    row[COLUMNS.OBSERVATIONS] || "",     // Observaciones
+                    "",                        // Estado (vacío inicialmente)
+                    "",                        // Consulta de pago a caja
+                    "",                        // ¿Realizó el pago?
+                ];
 
+                returnedItems.push(returnedRow);
                 rowsToDelete.push(index + 2);
             }
         });

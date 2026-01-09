@@ -16,13 +16,13 @@ const showToast = (message, title, duration = 5, icon = "") => {
 
 /**
  * Genera clave única para identificar un registro
- * Formato: Nombre__Biblioteca__Ubicación__FechaVencimiento
+ * Formato: Apellidos_y_Nombres__Campus__Código_de_barras__Fecha_Vencimiento
  * 
  * @param {Array} row - Fila de datos
  * @returns {string} Clave única del registro
  */
 const generateRecordKey = (row) => {
-    return `${row[COLUMNS.NAME]}__${row[COLUMNS.LIBRARY]}__${row[COLUMNS.LOCATION]}__${row[COLUMNS.DUE_DATE]}`;
+    return `${row[COLUMNS.FULL_NAME]}__${row[COLUMNS.CAMPUS]}__${row[COLUMNS.BARCODE]}__${row[COLUMNS.DUE_DATE]}`;
 };
 
 /**

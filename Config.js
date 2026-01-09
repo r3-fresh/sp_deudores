@@ -30,25 +30,53 @@ const SHEETS = {
 };
 
 /**
- * Índices de columnas para facilitar mantenimiento
+ * Índices de columnas (0-indexed)
+ * 
+ * Estructura de overdueItems (17 columnas):
+ * 0-Campus, 1-Tipo usuario, 2-ID Usuario, 3-Apellidos y Nombres, 4-Celular,
+ * 5-Correo, 6-Título, 7-Código clasificación, 8-Código barras,
+ * 9-Fecha Préstamo, 10-Fecha Vencimiento, 11-Acciones, 12-Bitácora,
+ * 13-Fecha recargo boleta, 14-Fecha retiro boleta, 15-Costo, 16-Observaciones
+ * 
+ * Estructura trackingItems/returnedItems (20 columnas):
+ * Las primeras 11 igual a overdueItems, luego:
+ * 11-Fecha seguimiento/devolución, 12-Bitácora, 13-Fecha recargo,
+ * 14-Fecha retiro, 15-Costo, 16-Observaciones, 17-Estado,
+ * 18-Consulta pago caja, 19-¿Realizó pago?
  */
 const COLUMNS = {
-    DATE: 0,
-    TIME: 1,
-    NAME: 2,
-    LASTNAME: 3,
-    USER_ID: 4,
+    // Columnas principales (comunes en todas las hojas)
+    CAMPUS: 0,
+    USER_TYPE: 1,
+    USER_ID: 2,
+    FULL_NAME: 3,
+    PHONE: 4,
     EMAIL: 5,
     TITLE: 6,
-    BARCODE: 7,
-    LIBRARY: 8,
-    LOCATION: 9,
+    CLASSIFICATION: 7,
+    BARCODE: 8,
+    LOAN_DATE: 9,
     DUE_DATE: 10,
-    ACTION: 11,
-    LOG: 12,
-    STATUS: 11,
-    RETURN_DATE: 11,
-    RETURN_COMMENT: 12,
+
+    // Columnas específicas de overdueItems
+    ACTION: 11,           // Acciones (overdueItems)
+    LOG: 12,              // Bitácora de acciones
+    RECHARGE_DATE: 13,    // Fecha de recargo a la boleta
+    WITHDRAWAL_DATE: 14,  // Fecha de retiro en la boleta
+    COST: 15,             // Costo
+    OBSERVATIONS: 16,     // Observaciones
+
+    // Columnas adicionales en trackingItems/returnedItems
+    TRACKING_DATE: 11,    // Fecha de seguimiento (trackingItems)
+    RETURN_DATE: 11,      // Fecha de devolución (returnedItems)
+    STATUS: 17,           // Estado
+    PAYMENT_QUERY: 18,    // Consulta de pago a caja
+    PAYMENT_DONE: 19,     // ¿Realizó el pago?
+
+    // Contadores de columnas por hoja
+    OVERDUE_TOTAL: 17,    // Total de columnas en overdueItems
+    TRACKING_TOTAL: 20,   // Total de columnas en trackingItems
+    RETURNED_TOTAL: 20,   // Total de columnas en returnedItems
 };
 
 /**

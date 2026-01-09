@@ -19,8 +19,16 @@ const moveToReturnedItems = (rowsWithNumbers) => {
         const rowsData = rowsWithNumbers.map((row) => row.slice(0, -1));
         const rowNumbers = rowsWithNumbers.map((row) => row[row.length - 1]);
 
+        const timestamp = new Date().toLocaleString("es-PE", {
+            timeZone: "America/Lima",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+
         const valuesToCopy = rowsData.map((row, index) => {
-            const baseData = row.slice(0, COLUMNS.ACTION);
             const rowNumber = rowNumbers[index];
 
             const logInfo = SHEETS.overdueItems
@@ -28,13 +36,27 @@ const moveToReturnedItems = (rowsWithNumbers) => {
                 .getValue();
 
             const actionMessage = logInfo
-                ? `${logInfo}\n${new Date().toLocaleString()}: Ítem devuelto por ejecución de acciones`
-                : `${new Date().toLocaleString()}: Ítem devuelto por ejecución de acciones`;
+                ? `${logInfo}\n${timestamp}: Ítem devuelto por ejecución de acciones`
+                : `${timestamp}: Ítem devuelto por ejecución de acciones`;
+
+            // Estructura para returnedItems (20 columnas):
+            // 0-10: Campus hasta Fecha de Vencimiento
+            // 11: Fecha de devolución
+            // 12: Bitácora de acciones
+            // 13-16: Fecha recargo, Fecha retiro, Costo, Observaciones
+            // 17-19: Estado, Consulta pago caja, ¿Realizó pago?
 
             return [
-                ...baseData,
-                new Date(),
-                actionMessage,
+                ...row.slice(0, 11),                    // Campus hasta Fecha de Vencimiento
+                new Date(),                             // Fecha de devolución
+                actionMessage,                          // Bitácora actualizada
+                row[COLUMNS.RECHARGE_DATE] || "",      // Fecha de recargo
+                row[COLUMNS.WITHDRAWAL_DATE] || "",    // Fecha de retiro
+                row[COLUMNS.COST] || "",               // Costo
+                row[COLUMNS.OBSERVATIONS] || "",       // Observaciones
+                "",                                     // Estado
+                "",                                     // Consulta de pago a caja
+                "",                                     // ¿Realizó el pago?
             ];
         });
 
@@ -76,8 +98,16 @@ const moveToTrackingItems = (rowsWithNumbers) => {
         const rowsData = rowsWithNumbers.map((row) => row.slice(0, -1));
         const rowNumbers = rowsWithNumbers.map((row) => row[row.length - 1]);
 
+        const timestamp = new Date().toLocaleString("es-PE", {
+            timeZone: "America/Lima",
+            year: "numeric",
+            month: "2-digit",
+            day: "2-digit",
+            hour: "2-digit",
+            minute: "2-digit",
+        });
+
         const valuesToCopy = rowsData.map((row, index) => {
-            const baseData = row.slice(0, COLUMNS.ACTION);
             const rowNumber = rowNumbers[index];
 
             const logInfo = SHEETS.overdueItems
@@ -85,24 +115,41 @@ const moveToTrackingItems = (rowsWithNumbers) => {
                 .getValue();
 
             const actionMessage = logInfo
-                ? `${logInfo}\n${new Date().toLocaleString()}: Ítem movido a Seguimiento`
-                : `${new Date().toLocaleString()}: Ítem movido a Seguimiento`;
+                ? `${logInfo}\n${timestamp}: Ítem movido a Seguimiento`
+                : `${timestamp}: Ítem movido a Seguimiento`;
 
-            SHEETS.overdueItems
-                .getRange(rowNumber, COLUMNS.ACTION + 1)
-                .clearContent();
+            // Estructura para trackingItems (20 columnas):
+            // 0-10: Campus hasta Fecha de Vencimiento
+            // 11: Fecha de seguimiento
+            // 12: Bitácora de acciones
+            // 13-16: Fecha recargo, Fecha retiro, Costo, Observaciones
+            // 17-19: Estado, Consulta pago caja, ¿Realizó pago?
 
             return [
-                ...baseData,
-                new Date(),
-                actionMessage,
+                ...row.slice(0, 11),                    // Campus hasta Fecha de Vencimiento
+                new Date(),                             // Fecha de seguimiento
+                actionMessage,                          // Bitácora actualizada
+                row[COLUMNS.RECHARGE_DATE] || "",      // Fecha de recargo
+                row[COLUMNS.WITHDRAWAL_DATE] || "",    // Fecha de retiro
+                row[COLUMNS.COST] || "",               // Costo
+                row[COLUMNS.OBSERVATIONS] || "",       // Observaciones
+                "",                                     // Estado
+                "",                                     // Consulta de pago a caja
+                "",                                     // ¿Realizó el pago?
             ];
         });
 
+        // Insertar en seguimiento (1 operación)
         const lastRow = SHEETS.trackingItems.getLastRow();
         SHEETS.trackingItems
             .getRange(lastRow + 1, 1, valuesToCopy.length, valuesToCopy[0].length)
             .setValues(valuesToCopy);
+
+        // Limpiar acciones de las filas en overdueItems
+        // IMPORTANTE: Hacer esto DESPUÉS de copiar los datos
+        rowNumbers.forEach((rowNum) => {
+            SHEETS.overdueItems.getRange(rowNum, COLUMNS.ACTION + 1).clearContent();
+        });
 
         return true;
     } catch (error) {
@@ -182,21 +229,18 @@ const executeActions = () => {
             return;
         }
 
-        // Procesar movimientos a Recursos devueltos (batch)
-        if (actionsBatch[ACTIONS.MOVE_TO_RETURNED].length > 0) {
-            const batch = actionsBatch[ACTIONS.MOVE_TO_RETURNED];
-            const rowsToProcess = batch.map((item) => [...item.data, item.rowNumber]);
-            moveToReturnedItems(rowsToProcess);
-        }
+        // ===================================
+        // ORDEN CRÍTICO DE EJECUCIÓN
+        // ===================================
+        // 1. Correos (no modifican filas)
+        // 2. Movimientos a Seguimiento (no eliminan filas)
+        // 3. Movimientos a Devueltos (ELIMINA filas - debe ser ÚLTIMO)
+        //
+        // Razón: Cuando se eliminan filas, los índices de fila cambian.
+        // Si procesamos devoluciones primero, las referencias de fila
+        // de las demás acciones quedarán obsoletas.
 
-        // Procesar movimientos a Seguimiento (batch)
-        if (actionsBatch[ACTIONS.MOVE_TO_TRACKING].length > 0) {
-            const batch = actionsBatch[ACTIONS.MOVE_TO_TRACKING];
-            const rowsToProcess = batch.map((item) => [...item.data, item.rowNumber]);
-            moveToTrackingItems(rowsToProcess);
-        }
-
-        // Procesar envíos de correo (individual)
+        // PASO 1: Procesar envíos de correo (no modifica filas)
         const emailActions = [
             ACTIONS.FIRST_REMINDER,
             ACTIONS.SECOND_REMINDER,
@@ -216,6 +260,20 @@ const executeActions = () => {
                 });
             }
         });
+
+        // PASO 2: Procesar movimientos a Seguimiento (no elimina filas)
+        if (actionsBatch[ACTIONS.MOVE_TO_TRACKING].length > 0) {
+            const batch = actionsBatch[ACTIONS.MOVE_TO_TRACKING];
+            const rowsToProcess = batch.map((item) => [...item.data, item.rowNumber]);
+            moveToTrackingItems(rowsToProcess);
+        }
+
+        // PASO 3: Procesar movimientos a Recursos devueltos (ELIMINA filas - debe ser último)
+        if (actionsBatch[ACTIONS.MOVE_TO_RETURNED].length > 0) {
+            const batch = actionsBatch[ACTIONS.MOVE_TO_RETURNED];
+            const rowsToProcess = batch.map((item) => [...item.data, item.rowNumber]);
+            moveToReturnedItems(rowsToProcess);
+        }
 
         const emailCount =
             actionsBatch[ACTIONS.FIRST_REMINDER].length +
