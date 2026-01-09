@@ -1,16 +1,3 @@
-/**
- * ========================================
- * SISTEMA DE GESTIÓN DE DEUDORES
- * ========================================
- *
- * Automatiza el proceso de gestión de préstamos vencidos integrando
- * datos del sistema Alma con Google Sheets.
- *
- * @author Fredy Romero <romeroespinoza.fp@gmail.com>
- * @version 1.0.0
- * @license MIT
- */
-
 // ========================================
 // 1. CONFIGURACIÓN Y CONSTANTES
 // ========================================
