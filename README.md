@@ -4,7 +4,7 @@
 
 - **Nombre del Proyecto**: Sistema de Gestión de Deudores
 - **Autor**: Fredy Romero <romeroespinoza.fp@gmail.com>
-- **Versión**: 1.0.0
+- **Versión**: 2.0.0
 - **Licencia**: MIT
 - **ID del Script**: 16b7rtb2oDqkQ2TOZ8TqOwNasxu9nkJMFpvAe4aodz17Uq3Qzs7FN4iae
 
@@ -18,12 +18,28 @@ Este sistema automatiza el proceso de gestión de deudores utilizando Google App
 /sp_deudores/
 ├── .clasp.json         # Configuración para Google Apps Script
 ├── .gitignore          # Archivos ignorados por Git
-├── README.md           # Información básica del proyecto
-├── appsscript.json     # Configuración del script para Google Apps Script
-├── emailTemplate.html  # Plantilla HTML para correos electrónicos
-├── main.js             # Código principal del sistema
-└── package.json        # Dependencias y configuración del proyecto
+├── README.md           # Documentación del proyecto
+├── appsscript.json     # Configuración del script
+├── package.json        # Dependencias y configuración
+├── Main.js             # Punto de entrada y documentación principal (51 líneas)
+├── Config.js           # Constantes y configuración (73 líneas)
+├── Utils.js            # Funciones auxiliares (104 líneas)
+├── DataProcessor.js    # Procesamiento de datos de Alma (185 líneas)
+├── Emails.js           # Envío de correos electrónicos (209 líneas)
+├── Actions.js          # Ejecución de acciones por lotes (231 líneas)
+├── UI.js               # Interfaz de usuario y menús (45 líneas)
+└── templates/          # Plantillas HTML para correos
+    ├── emailFirstReminder.html
+    ├── emailSecondReminder.html
+    ├── emailRechargeNotice.html
+    └── emailRechargeConfirmation.html
 ```
+
+**Mejoras en v2.0.0:**
+- ✅ Código modularizado en archivos separados por responsabilidad
+- ✅ Reducción de ~900 líneas a ~848 líneas totales (sin comentarios excesivos)
+- ✅ Implementación básica de funciones de envío de email
+- ✅ Mejor mantenibilidad y escalabilidad
 
 ## Hojas de Cálculo
 
@@ -56,30 +72,36 @@ El sistema utiliza las siguientes hojas de cálculo:
 
 ## Funciones Principales
 
-### Funciones de Procesamiento
+### Módulo: DataProcessor.js
 
 | Función | Descripción |
 |---------|-------------|
-| `resetSheetForNewData()` | Limpia la hoja "Reporte de deudores - Widget" para nuevos datos |
-| `startProcess()` | Procesa los datos de Alma, identifica nuevos deudores y recursos devueltos |
+| `deleteData()` | Limpia la hoja "Reporte de deudores - Widget" para nuevos datos |
+| `startProcess()` | Procesa datos de Alma, identifica nuevos deudores y recursos devueltos |
 
-### Funciones de Acciones
+### Módulo: Actions.js
 
 | Función | Descripción |
 |---------|-------------|
-| `moverARecursosDevueltos()` | Mueve registros a la hoja "Recursos devueltos / Histórico" |
-| `moverASeguimientoPrestamos()` | Mueve registros a la hoja "Seguimiento de préstamos" |
-| `enviarPrimerRecordatorio()` | Envía correo de primer recordatorio (pendiente de implementación) |
-| `enviarSegundoRecordatorio()` | Envía correo de segundo recordatorio (pendiente de implementación) |
-| `enviarAvisoRecarga()` | Envía correo de aviso de recarga (pendiente de implementación) |
-| `enviarConfirmacionRecarga()` | Envía correo de confirmación de recarga (pendiente de implementación) |
-| `executeActions()` | Ejecuta acciones basadas en los valores de la columna N (14) |
+| `moveToReturnedItems()` | Mueve registros a "Recursos devueltos / Histórico" |
+| `moveToTrackingItems()` | Mueve registros a "Seguimiento de préstamos" |
+| `executeActions()` | Ejecuta acciones basadas en los valores de la columna L |
 
-### Funciones de Interfaz
+### Módulo: Emails.js
+
+| Función | Descripción |
+|---------|-------------|
+| `sendFirstReminder()` | Envía primer recordatorio al deudor |
+| `sendSecondReminder()` | Envía segundo recordatorio (tono más firme) |
+| `sendRechargeNotice()` | Envía aviso de recarga por mora |
+| `sendRechargeConfirmation()` | Envía confirmación de pago de recarga |
+
+### Módulo: UI.js
 
 | Función | Descripción |
 |---------|-------------|
 | `onOpen()` | Crea el menú personalizado en la interfaz de Google Sheets |
+| `hasScript()` | Muestra información sobre el script actual |
 
 ## Flujo de Trabajo
 
