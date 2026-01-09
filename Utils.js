@@ -15,14 +15,14 @@ const showToast = (message, title, duration = 5, icon = "") => {
 };
 
 /**
- * Genera clave única para identificar un registro
- * Formato: Apellidos_y_Nombres__Campus__Código_de_barras__Fecha_Vencimiento
+ * Genera clave única para identificar un préstamo
+ * Formato: Título__Campus__Código_de_barras__Fecha_Vencimiento
  * 
  * @param {Array} row - Fila de datos
- * @returns {string} Clave única del registro
+ * @returns {string} Clave única del préstamo
  */
 const generateRecordKey = (row) => {
-    return `${row[COLUMNS.FULL_NAME]}__${row[COLUMNS.CAMPUS]}__${row[COLUMNS.BARCODE]}__${row[COLUMNS.DUE_DATE]}`;
+    return `${row[COLUMNS.TITLE]}__${row[COLUMNS.CAMPUS]}__${row[COLUMNS.BARCODE]}__${row[COLUMNS.DUE_DATE]}`;
 };
 
 /**
