@@ -184,7 +184,9 @@ const sendRechargeNotice = (data, rowNumber) => {
   const costo = data[COLUMNS.COST] || "S/ 0.00";
 
   // Fecha límite = valor de la columna "Fecha de recargo a la boleta"
-  const fechaLimite = data[COLUMNS.RECHARGE_DATE] ? new Date(data[COLUMNS.RECHARGE_DATE]) : new Date();
+  // formatDate maneja el formato dd/mm/yyyy directamente
+  const fechaLimiteValue = data[COLUMNS.RECHARGE_DATE] || "";
+  const fechaLimite = formatDate(fechaLimiteValue);
 
   // Cargar y procesar plantilla HTML
   const template = HtmlService.createTemplateFromFile('templates/emailRechargeNotice');
@@ -193,7 +195,7 @@ const sendRechargeNotice = (data, rowNumber) => {
   template.FECHA_VENCIMIENTO = fechaVencimiento;
   template.FECHA_LIMITE = formatDate(fechaLimite);
   template.LIBROS = formatBookList(titulo);
-  template.MONTO = costo;
+  template.MONTO = "S/ " + costo;
   template.URL_IMAGEN_BUZON = EMAIL_CONFIG.MAILBOX_IMAGE_URL;
 
   const subject = `Hub ${EMAIL_CONFIG.CAMPUS_NAME} | ⚠️ Aviso de recarga por devolución pendiente de libro`;
@@ -224,7 +226,7 @@ const sendRechargeConfirmation = (data, rowNumber) => {
   template.NOMBRE = nombre;
   template.CAMPUS = EMAIL_CONFIG.CAMPUS_NAME;
   template.LIBROS = formatBookList(titulo);
-  template.MONTO = costo;
+  template.MONTO = "S/ " + costo;
   template.URL_IMAGEN_BUZON = EMAIL_CONFIG.MAILBOX_IMAGE_URL;
 
   const subject = `Hub ${EMAIL_CONFIG.CAMPUS_NAME} | ⚠️ Confirmación de recargo por devolución pendiente`;
