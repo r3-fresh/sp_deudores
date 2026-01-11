@@ -102,3 +102,11 @@ const STATUS = {
     REGISTERED: "YA REGISTRADO",
     NEW: "NUEVO DEUDOR",
 };
+
+/**
+ * Configuración de emails
+ */
+const EMAIL_CONFIG = {
+    CAMPUS_NAME: "Huancayo",  // Nombre del campus para asuntos de correo
+    MAILBOX_IMAGE_URL: "https://hubinformacion.continental.edu.pe/web/wp-content/uploads/2026/01/buzones-hyo.png",     // URL de la imagen del buzón (agregar por el usuario)
+};

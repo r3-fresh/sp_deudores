@@ -49,7 +49,34 @@ const getMonthName = (date) => {
  */
 const formatDate = (date) => {
   if (!date) return "";
-  const d = typeof date === 'string' ? new Date(date) : date;
+
+  let d;
+
+  // Si ya es un objeto Date válido
+  if (date instanceof Date) {
+    d = date;
+  }
+  // Si es un string en formato dd/mm/yyyy
+  else if (typeof date === 'string' && date.includes('/')) {
+    const parts = date.split('/');
+    if (parts.length === 3) {
+      // Formato dd/mm/yyyy -> convertir a Date(year, month-1, day)
+      d = new Date(parseInt(parts[2]), parseInt(parts[1]) - 1, parseInt(parts[0]));
+    } else {
+      d = new Date(date);
+    }
+  }
+  // Cualquier otro tipo (número, string sin /, etc.)
+  else {
+    d = new Date(date);
+  }
+
+  // Validar que la fecha sea válida
+  if (isNaN(d.getTime())) {
+    console.error("Fecha inválida:", date);
+    return "";
+  }
+
   const day = String(d.getDate()).padStart(2, '0');
   const month = String(d.getMonth() + 1).padStart(2, '0');
   const year = d.getFullYear();
@@ -74,18 +101,24 @@ const sendFirstReminder = (data, rowNumber) => {
   const email = data[COLUMNS.EMAIL];
   const nombre = data[COLUMNS.FULL_NAME];
   const titulo = data[COLUMNS.TITLE];
-  const fechaVencimiento = formatDate(data[COLUMNS.DUE_DATE]);
-  const mes = getMonthName(new Date(data[COLUMNS.DUE_DATE]));
 
-  // Cargar plantilla HTML
+  // Fecha de vencimiento = 1 día después de hoy
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const fechaVencimiento = formatDate(tomorrow);
+  const mes = getMonthName(tomorrow);
+
+  // Cargar y procesar plantilla HTML
   const template = HtmlService.createTemplateFromFile('templates/emailFirstReminder');
   template.NOMBRE = nombre;
+  template.CAMPUS = EMAIL_CONFIG.CAMPUS_NAME;
   template.MES = mes;
   template.FECHA_VENCIMIENTO = fechaVencimiento;
   template.LIBROS = formatBookList(titulo);
-  template.URL_IMAGEN_BUZON = "https://hubinformacion.continental.edu.pe/web/wp-content/uploads/2026/01/buzones-hyo.png";
+  template.URL_IMAGEN_BUZON = EMAIL_CONFIG.MAILBOX_IMAGE_URL;
 
-  const subject = "Hub Huancayo | 🚨 ¡Atención! Tienes un libro pendiente para devolver ⚠️ 1er recordatorio";
+  const subject = `Hub ${EMAIL_CONFIG.CAMPUS_NAME} | ⚠️ ¡Atención! Tienes un libro pendiente para devolver ⚠️ 1er recordatorio`;
+
   const htmlBody = template.evaluate().getContent();
 
   if (sendEmail(email, subject, htmlBody)) {
@@ -112,16 +145,22 @@ const sendSecondReminder = (data, rowNumber) => {
   const email = data[COLUMNS.EMAIL];
   const nombre = data[COLUMNS.FULL_NAME];
   const titulo = data[COLUMNS.TITLE];
-  const fechaVencimiento = formatDate(data[COLUMNS.DUE_DATE]);
 
-  // Cargar plantilla HTML
+  // Fecha de vencimiento = 1 día después de hoy
+  const tomorrow = new Date();
+  tomorrow.setDate(tomorrow.getDate() + 1);
+  const fechaVencimiento = formatDate(tomorrow);
+
+  // Cargar y procesar plantilla HTML
   const template = HtmlService.createTemplateFromFile('templates/emailSecondReminder');
   template.NOMBRE = nombre;
+  template.CAMPUS = EMAIL_CONFIG.CAMPUS_NAME;
   template.FECHA_VENCIMIENTO = fechaVencimiento;
   template.LIBROS = formatBookList(titulo);
-  template.URL_IMAGEN_BUZON = ""; // Usuario agregará el enlace
+  template.URL_IMAGEN_BUZON = EMAIL_CONFIG.MAILBOX_IMAGE_URL;
 
-  const subject = "Hub Huancayo | 🚨 ¡Atención! Aún tienes un libro pendiente por devolver ⚠️ 2do recordatorio";
+  const subject = `Hub ${EMAIL_CONFIG.CAMPUS_NAME} | ⚠️ ¡Atención! Aún tienes un libro pendiente por devolver ⚠️ 2do recordatorio`;
+
   const htmlBody = template.evaluate().getContent();
 
   if (sendEmail(email, subject, htmlBody)) {
@@ -142,21 +181,23 @@ const sendRechargeNotice = (data, rowNumber) => {
   const nombre = data[COLUMNS.FULL_NAME];
   const titulo = data[COLUMNS.TITLE];
   const fechaVencimiento = formatDate(data[COLUMNS.DUE_DATE]);
-  const costo = data[COLUMNS.COST] || "S/ 0.00"; // Obtener costo o valor por defecto
+  const costo = data[COLUMNS.COST] || "S/ 0.00";
 
-  // Calcular fecha límite (por ejemplo, 3 días después de hoy)
-  const fechaLimite = new Date();
-  fechaLimite.setDate(fechaLimite.getDate() + 3);
+  // Fecha límite = valor de la columna "Fecha de recargo a la boleta"
+  const fechaLimite = data[COLUMNS.RECHARGE_DATE] ? new Date(data[COLUMNS.RECHARGE_DATE]) : new Date();
 
-  // Cargar plantilla HTML
+  // Cargar y procesar plantilla HTML
   const template = HtmlService.createTemplateFromFile('templates/emailRechargeNotice');
   template.NOMBRE = nombre;
+  template.CAMPUS = EMAIL_CONFIG.CAMPUS_NAME;
   template.FECHA_VENCIMIENTO = fechaVencimiento;
   template.FECHA_LIMITE = formatDate(fechaLimite);
   template.LIBROS = formatBookList(titulo);
   template.MONTO = costo;
+  template.URL_IMAGEN_BUZON = EMAIL_CONFIG.MAILBOX_IMAGE_URL;
 
-  const subject = "Hub Huancayo | 🚨 Aviso de recarga por devolución pendiente de libro";
+  const subject = `Hub ${EMAIL_CONFIG.CAMPUS_NAME} | ⚠️ Aviso de recarga por devolución pendiente de libro`;
+
   const htmlBody = template.evaluate().getContent();
 
   if (sendEmail(email, subject, htmlBody)) {
@@ -178,14 +219,16 @@ const sendRechargeConfirmation = (data, rowNumber) => {
   const titulo = data[COLUMNS.TITLE];
   const costo = data[COLUMNS.COST] || "S/ 0.00";
 
-  // Cargar plantilla HTML
+  // Cargar y procesar plantilla HTML
   const template = HtmlService.createTemplateFromFile('templates/emailRechargeConfirmation');
   template.NOMBRE = nombre;
+  template.CAMPUS = EMAIL_CONFIG.CAMPUS_NAME;
   template.LIBROS = formatBookList(titulo);
   template.MONTO = costo;
-  template.URL_IMAGEN_BUZON = "https://hubinformacion.continental.edu.pe/web/wp-content/uploads/2026/01/buzones-hyo.png";
+  template.URL_IMAGEN_BUZON = EMAIL_CONFIG.MAILBOX_IMAGE_URL;
 
-  const subject = "Hub Huancayo | 🚨 Confirmación de recargo por devolución pendiente";
+  const subject = `Hub ${EMAIL_CONFIG.CAMPUS_NAME} | ⚠️ Confirmación de recargo por devolución pendiente`;
+
   const htmlBody = template.evaluate().getContent();
 
   if (sendEmail(email, subject, htmlBody)) {

@@ -2,7 +2,8 @@
 <html>
 
 <head>
-  <base target="_top">
+  <meta charset="UTF-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
 </head>
 
 <body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f2f2f2;">
@@ -12,20 +13,29 @@
         <table width="600" cellpadding="0" cellspacing="0" border="0"
           style="background-color: #ffffff; max-width: 600px;">
 
-          <!-- Header -->
+          <!-- Header: Logo y título en línea -->
           <tr>
-            <td align="center" style="padding: 30px 20px 20px 20px;">
-              <img
-                src="https://ci6.googleusercontent.com/proxy/h9njXK3mllYy_7gMz4cP0NM0BxxxRAQ5ioBxUdJYtmRv1hU1TSKJAaP584AykBcLNRJYOWbMuHYUF-QuDxeR7mO6OnxqnzarGgxD7KrJ-yEq2NCsjb2bW9jfqhdh9YxzU5Wz5p5cfYz6qqDybm1KzlxFs0XQdBT7ILg=s0-d-e1-ft"
-                alt="Hub de Información" width="80" height="auto" style="display: block; margin-bottom: 15px;">
-              <h1 style="margin: 0; font-size: 28px; color: #333333; font-weight: normal;">Hub de Información</h1>
+            <td style="padding: 30px 20px 20px 20px;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                <tr>
+                  <td width="100" valign="middle" style="padding-right: 15px;">
+                    <img
+                      src="https://ci6.googleusercontent.com/proxy/h9njXK3mllYy_7gMz4cP0NM0BxxxRAQ5ioBxUdJYtmRv1hU1TSKJAaP584AykBcLNRJYOWbMuHYUF-QuDxeR7mO6OnxqnzarGgxD7KrJ-yEq2NCsjb2bW9jfqhdh9YxzU5Wz5p5cfYz6qqDybm1KzlxFs0XQdBT7ILg=s0-d-e1-ft"
+                      alt="Hub de Información" width="80" height="auto" style="display: block;">
+                  </td>
+                  <td valign="middle" style="text-align:right;">
+                    <h1 style="margin: 0; font-size: 32px; color: #333333; font-weight: normal; line-height: 1.2;">Hub
+                      de Información</h1>
+                  </td>
+                </tr>
+              </table>
             </td>
           </tr>
 
           <!-- Subtitle -->
           <tr>
-            <td align="center" style="padding: 20px; background-color: #ff3300; color: #ffffff;">
-              <h2 style="margin: 0; font-size: 22px; font-weight: bold;">Aviso de recarga</h2>
+            <td align="center" style="padding: 20px; background-color: #ff6b00; color: #ffffff;">
+              <h2 style="margin: 0; font-size: 22px; font-weight: bold;">Aviso de Recarga</h2>
             </td>
           </tr>
 
@@ -33,28 +43,31 @@
           <tr>
             <td style="padding: 30px 40px; color: #333333; font-size: 14px; line-height: 1.6;">
 
-              <p style="margin: 0 0 15px 0; font-size: 16px;"><strong>Estimado/a {{NOMBRE}},</strong></p>
+              <p style="margin: 0 0 15px 0; font-size: 16px;"><strong>Estimado/a
+                  <?= NOMBRE ?>,
+                </strong></p>
 
-              <p style="margin: 0 0 15px 0;">Recibe un cordial saludo de parte del equipo del <strong>Hub Huancayo -
-                  Biblioteca</strong>.</p>
+              <p style="margin: 0 0 15px 0;">Recibe un cordial saludo de parte del equipo del <strong>Hub
+                  <?= CAMPUS ?> - Biblioteca
+                </strong>.</p>
 
               <p style="margin: 0 0 15px 0;">En comunicaciones anteriores se le informó que está pendiente la devolución
                 del siguiente libro:</p>
 
               <div style="background-color: #fff9c4; border-left: 4px solid #fdd835; padding: 15px; margin: 20px 0;">
-                <p style="margin: 0 0 10px 0; font-weight: bold; color: #827717;">📚 Libro(s) pendiente(s):</p>
+                <p style="margin: 0 0 10px 0; font-weight: bold; color: #827717;">⚠️ Libro(s) pendiente(s):</p>
                 <ul style="margin: 0; padding-left: 20px;">
-                  {{LIBROS}}
+                  <?!= LIBROS ?>
                 </ul>
               </div>
 
               <div style="background-color: #fff3e0; border-left: 4px solid #ff6b00; padding: 15px; margin: 20px 0;">
-                <p style="margin: 0 0 10px 0; font-weight: bold; color: #e65100;">📅 Fecha de vencimiento:
-                  {{FECHA_VENCIMIENTO}}</p>
-                <p style="margin: 0;">La fecha de vencimiento de los libros fue el
-                  <strong>{{FECHA_VENCIMIENTO}}</strong>, por lo que agradeceríamos que pueda realizar la devolución a
-                  la brevedad posible.
+                <p style="margin: 0 0 10px 0; font-weight: bold; color: #e65100;">⚠️ Fecha de vencimiento:
+                  <?= FECHA_VENCIMIENTO ?>
                 </p>
+                <p style="margin: 0;">La fecha de vencimiento de los libros fue el <strong>
+                    <?= FECHA_VENCIMIENTO ?>
+                  </strong>, por lo que agradeceríamos que pueda realizar la devolución a la brevedad posible.</p>
               </div>
 
               <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 20px 0;">
@@ -62,32 +75,43 @@
                   <td align="center"
                     style="background-color: #ffebee; border: 2px solid #ff6b00; border-radius: 8px; padding: 20px;">
                     <p style="margin: 0 0 10px 0; font-weight: bold;">⚠️ AVISO IMPORTANTE</p>
-                    <p style="margin: 0 0 10px 0;">De no recibir los libros hasta el día
-                      <strong>{{FECHA_LIMITE}}</strong>, procederemos a cargar en su pensión:
+                    <p style="margin: 0 0 10px 0;">De no recibir los libros hasta el día <strong>
+                        <?= FECHA_LIMITE ?>
+                      </strong>, procederemos a cargar en su pensión:</p>
+                    <p style="margin: 10px 0; font-size: 24px; font-weight: bold; color: #c62828;">
+                      <?= MONTO ?>
                     </p>
-                    <p style="margin: 10px 0; font-size: 24px; font-weight: bold; color: #c62828;">{{MONTO}}</p>
                     <p style="margin: 0; font-size: 14px; color: #666666;">Por concepto de "Deuda de libros"</p>
                   </td>
                 </tr>
               </table>
 
               <div style="background-color: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
-                <p style="margin: 0;"><strong>💡 Recuerde:</strong> Puede evitar este cargo realizando la devolución de
+                <p style="margin: 0;"><strong>ℹ️ Recuerde:</strong> Puede evitar este cargo realizando la devolución de
                   los materiales antes de la fecha límite mencionada.</p>
               </div>
 
-              <div
-                style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px; margin: 20px 0; text-align: center;">
-                <p style="margin: 0 0 5px 0; font-weight: bold;">¿Tiene algún inconveniente?</p>
-                <p style="margin: 0; font-size: 13px;">No dude en contactarnos a través de nuestros canales de atención
-                  presencial y virtual.</p>
+              <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin: 20px 0;">
+                <p style="margin: 0;"><strong>⚠️ Importante:</strong> Al momento de devolver el libro, ¡no olvides
+                  comentárselo al bibliotecario!</p>
               </div>
+
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 25px 0;">
+                <tr>
+                  <td align="center">
+                    <img src="<?= URL_IMAGEN_BUZON ?>" alt="Buzones de devolución"
+                      style="max-width: 100%; height: auto; display: block; border-radius: 8px;">
+                    <p
+                      style="margin: 8px 0 0 0; font-size: 12px; color: #666666; font-style: italic; text-align: center;">
+                      Foto del buzón de devoluciones - Piso 2 y piso 3 del pabellón F</p>
+                  </td>
+                </tr>
+              </table>
 
               <p style="margin: 0 0 15px 0;">Quedamos atentos a sus comentarios.</p>
 
               <p style="margin: 30px 0 0 0;">
-                Saludos cordiales,<br>
-                <strong>Hub de Información - Biblioteca UC Continental</strong>
+                Saludos cordiales,
               </p>
             </td>
           </tr>
@@ -96,13 +120,43 @@
           <tr>
             <td align="center" style="padding: 20px; background-color: #333333; color: #ffffff; font-size: 12px;">
               <p style="margin: 0 0 5px 0; font-weight: bold;">Hub de Información - Universidad Continental</p>
-              <p style="margin: 0 0 10px 0;">Huancayo - Perú</p>
-              <p style="margin: 0; font-size: 11px;">Este es un mensaje automático, por favor no responder directamente
-                a este correo.</p>
             </td>
           </tr>
 
         </table>
+      </td>
+    </tr>
+  </table>
+
+  <table>
+    <!-- Separator before signature -->
+    <tr>
+      <td style="padding: 0 40px;">
+        <div style="height: 1px; background-color: #dddddd; margin: 20px 0;"></div>
+      </td>
+    </tr>
+
+    <!-- Signature -->
+    <tr>
+      <td style="padding: 20px 40px; color: #333333; font-size: 13px; line-height: 1.6;">
+        <p style="margin: 0 0 10px 0; font-weight: bold; font-size: 14px;">Hub de Información -
+          <?= CAMPUS ?>
+        </p>
+
+        <p style="margin: 0 0 5px 0;">➡️ <strong>Horario de atención presencial:</strong></p>
+        <p style="margin: 0 0 3px 0; padding-left: 20px;">Lunes a viernes: 7:30 a. m. a 9:00 p. m.</p>
+        <p style="margin: 0 0 3px 0; padding-left: 20px;">Sábados: 8:00 a. m. a 8:00 p. m.</p>
+        <p style="margin: 0 0 10px 0; padding-left: 20px;">Domingos: 9:00 a. m. a 4:00 p. m.</p>
+
+        <p style="margin: 0 0 10px 0;">➡️ <strong>064-481430 Anexo: 7862</strong> | <a href="https://wa.me/51944481430"
+            style="color: #25D366; text-decoration: none;">WhatsApp</a></p>
+
+        <p style="margin: 0 0 5px 0;">Revisa nuestras actividades presenciales <a
+            href="https://ucontinental.libcal.com/calendar/actividadeshuancayo"
+            style="color: #0066cc; text-decoration: none;">aquí</a>.</p>
+
+        <p style="margin: 0;">Únete al <a href="https://whatsapp.com/channel/0029VaC1FeH2v1FXPvzAOE36"
+            style="color: #0066cc; text-decoration: none;">Canal de Hub de Información</a></p>
       </td>
     </tr>
   </table>
