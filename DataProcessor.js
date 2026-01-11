@@ -149,8 +149,9 @@ const startProcess = () => {
                 outputValues[update.row - firstRow] = [update.value];
             });
 
+            // Escribir todos los estados en columna "Estado" (índice 11)
             SHEETS.alma
-                .getRange(firstRow, COLUMNS.STATUS + 1, rowCount, 1)
+                .getRange(firstRow, COLUMNS.ALMA_STATUS + 1, rowCount, 1)
                 .setValues(outputValues);
         }
 

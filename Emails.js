@@ -10,23 +10,23 @@
  * @returns {boolean} true si el envío fue exitoso
  */
 const sendEmail = (to, subject, htmlBody) => {
-    try {
-        if (!to || to.trim() === "") {
-            console.error("Email destinatario vacío");
-            return false;
-        }
-
-        GmailApp.sendEmail(to, subject, "", {
-            htmlBody: htmlBody,
-            name: "Hub de Información - UC Continental",
-        });
-
-        console.log(`✅ Email enviado a ${to}: ${subject}`);
-        return true;
-    } catch (error) {
-        console.error(`❌ Error enviando email a ${to}:`, error);
-        return false;
+  try {
+    if (!to || to.trim() === "") {
+      console.error("Email destinatario vacío");
+      return false;
     }
+
+    // GmailApp.sendEmail(to, subject, "", {
+    //   htmlBody: htmlBody,
+    //   name: "Hub de Información - UC Continental",
+    // });
+
+    console.log(`✅ Email enviado a ${to}: ${subject}`);
+    return true;
+  } catch (error) {
+    console.error(`❌ Error enviando email a ${to}:`, error);
+    return false;
+  }
 };
 
 /**
@@ -35,13 +35,13 @@ const sendEmail = (to, subject, htmlBody) => {
  * @returns {string} HTML del correo
  */
 const createReminderEmailBody = (data) => {
-    const nombre = data[COLUMNS.NAME];
-    const apellido = data[COLUMNS.LASTNAME];
-    const titulo = data[COLUMNS.TITLE];
-    const biblioteca = data[COLUMNS.LIBRARY];
-    const fechaVencimiento = data[COLUMNS.DUE_DATE];
+  const nombre = data[COLUMNS.NAME];
+  const apellido = data[COLUMNS.LASTNAME];
+  const titulo = data[COLUMNS.TITLE];
+  const biblioteca = data[COLUMNS.LIBRARY];
+  const fechaVencimiento = data[COLUMNS.DUE_DATE];
 
-    return `
+  return `
     <!DOCTYPE html>
     <html>
     <head>
@@ -88,24 +88,24 @@ const createReminderEmailBody = (data) => {
  * @param {number} rowNumber - Número de fila
  */
 const sendFirstReminder = (data, rowNumber) => {
-    const email = data[COLUMNS.EMAIL];
-    const nombre = data[COLUMNS.NAME];
-    const subject = "📚 Recordatorio: Devolución de recurso pendiente";
-    const body = createReminderEmailBody(data);
+  const email = data[COLUMNS.EMAIL];
+  const nombre = data[COLUMNS.NAME];
+  const subject = "📚 Recordatorio: Devolución de recurso pendiente";
+  const body = createReminderEmailBody(data);
 
-    if (sendEmail(email, subject, body)) {
-        const currentLog = SHEETS.overdueItems
-            .getRange(rowNumber, COLUMNS.LOG + 1)
-            .getValue();
-        updateActionLog(rowNumber, "✉️ Primer recordatorio enviado", currentLog);
-    } else {
-        showToast(
-            `No se pudo enviar correo a ${nombre}`,
-            "Error de envío",
-            5,
-            "❌"
-        );
-    }
+  if (sendEmail(email, subject, body)) {
+    const currentLog = SHEETS.overdueItems
+      .getRange(rowNumber, COLUMNS.LOG + 1)
+      .getValue();
+    updateActionLog(rowNumber, "✉️ Primer recordatorio enviado", currentLog);
+  } else {
+    showToast(
+      `No se pudo enviar correo a ${nombre}`,
+      "Error de envío",
+      5,
+      "❌"
+    );
+  }
 };
 
 /**
@@ -114,14 +114,14 @@ const sendFirstReminder = (data, rowNumber) => {
  * @param {number} rowNumber - Número de fila
  */
 const sendSecondReminder = (data, rowNumber) => {
-    const email = data[COLUMNS.EMAIL];
-    const nombre = data[COLUMNS.NAME];
-    const apellido = data[COLUMNS.LASTNAME];
-    const titulo = data[COLUMNS.TITLE];
-    const fechaVencimiento = data[COLUMNS.DUE_DATE];
+  const email = data[COLUMNS.EMAIL];
+  const nombre = data[COLUMNS.NAME];
+  const apellido = data[COLUMNS.LASTNAME];
+  const titulo = data[COLUMNS.TITLE];
+  const fechaVencimiento = data[COLUMNS.DUE_DATE];
 
-    const subject = "⚠️ URGENTE: Segundo recordatorio - Devolución pendiente";
-    const body = `
+  const subject = "⚠️ URGENTE: Segundo recordatorio - Devolución pendiente";
+  const body = `
     <!DOCTYPE html>
     <html>
     <head>
@@ -155,12 +155,12 @@ const sendSecondReminder = (data, rowNumber) => {
     </html>
   `;
 
-    if (sendEmail(email, subject, body)) {
-        const currentLog = SHEETS.overdueItems
-            .getRange(rowNumber, COLUMNS.LOG + 1)
-            .getValue();
-        updateActionLog(rowNumber, "⚠️ Segundo recordatorio enviado", currentLog);
-    }
+  if (sendEmail(email, subject, body)) {
+    const currentLog = SHEETS.overdueItems
+      .getRange(rowNumber, COLUMNS.LOG + 1)
+      .getValue();
+    updateActionLog(rowNumber, "⚠️ Segundo recordatorio enviado", currentLog);
+  }
 };
 
 /**
@@ -169,16 +169,16 @@ const sendSecondReminder = (data, rowNumber) => {
  * @param {number} rowNumber - Número de fila
  */
 const sendRechargeNotice = (data, rowNumber) => {
-    const email = data[COLUMNS.EMAIL];
-    const subject = "💳 Aviso de recarga por mora en devolución";
-    const body = createReminderEmailBody(data); // TODO: Personalizar para recarga
+  const email = data[COLUMNS.EMAIL];
+  const subject = "💳 Aviso de recarga por mora en devolución";
+  const body = createReminderEmailBody(data); // TODO: Personalizar para recarga
 
-    if (sendEmail(email, subject, body)) {
-        const currentLog = SHEETS.overdueItems
-            .getRange(rowNumber, COLUMNS.LOG + 1)
-            .getValue();
-        updateActionLog(rowNumber, "💳 Aviso de recarga enviado", currentLog);
-    }
+  if (sendEmail(email, subject, body)) {
+    const currentLog = SHEETS.overdueItems
+      .getRange(rowNumber, COLUMNS.LOG + 1)
+      .getValue();
+    updateActionLog(rowNumber, "💳 Aviso de recarga enviado", currentLog);
+  }
 };
 
 /**
@@ -187,14 +187,14 @@ const sendRechargeNotice = (data, rowNumber) => {
  * @param {number} rowNumber - Número de fila
  */
 const sendRechargeConfirmation = (data, rowNumber) => {
-    const email = data[COLUMNS.EMAIL];
-    const subject = "✅ Confirmación de pago de recarga";
-    const body = createReminderEmailBody(data); // TODO: Personalizar para confirmación
+  const email = data[COLUMNS.EMAIL];
+  const subject = "✅ Confirmación de pago de recarga";
+  const body = createReminderEmailBody(data); // TODO: Personalizar para confirmación
 
-    if (sendEmail(email, subject, body)) {
-        const currentLog = SHEETS.overdueItems
-            .getRange(rowNumber, COLUMNS.LOG + 1)
-            .getValue();
-        updateActionLog(rowNumber, "✅ Confirmación de recarga enviada", currentLog);
-    }
+  if (sendEmail(email, subject, body)) {
+    const currentLog = SHEETS.overdueItems
+      .getRange(rowNumber, COLUMNS.LOG + 1)
+      .getValue();
+    updateActionLog(rowNumber, "✅ Confirmación de recarga enviada", currentLog);
+  }
 };

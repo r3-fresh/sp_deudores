@@ -73,7 +73,11 @@ const COLUMNS = {
     PAYMENT_QUERY: 18,    // Consulta de pago a caja
     PAYMENT_DONE: 19,     // ¿Realizó el pago?
 
+    // Columna específica de Alma (12 columnas total: 0-11)
+    ALMA_STATUS: 11,      // Estado (NUEVO DEUDOR / YA REGISTRADO)
+
     // Contadores de columnas por hoja
+    ALMA_TOTAL: 12,       // Total de columnas en Alma
     OVERDUE_TOTAL: 17,    // Total de columnas en overdueItems
     TRACKING_TOTAL: 20,   // Total de columnas en trackingItems
     RETURNED_TOTAL: 20,   // Total de columnas en returnedItems
