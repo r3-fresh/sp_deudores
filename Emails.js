@@ -85,22 +85,29 @@ const formatDate = (date) => {
 
 /**
  * Formatea lista de libros como HTML
- * @param {string} bookTitle - Título del libro
- * @returns {string} HTML con el libro
+ * @param {Array<string>|string} books - Título(s) del/los libro(s)
+ * @returns {string} HTML con los libros
  */
-const formatBookList = (bookTitle) => {
-  return `<li>${bookTitle}</li>`;
+const formatBookList = (books) => {
+  if (typeof books === 'string') {
+    return `<li>${books}</li>`;
+  }
+  // Si es un array, generar múltiples <li>
+  return books.map(book => `<li>${book}</li>`).join('\n');
 };
 
 /**
  * Envía primer recordatorio al deudor
- * @param {Array} data - Datos del registro
- * @param {number} rowNumber - Número de fila
+ * @param {Array<Array>} dataItems - Array de registros del mismo usuario
+ * @param {Array<number>} rowNumbers - Array de números de fila
  */
-const sendFirstReminder = (data, rowNumber) => {
-  const email = data[COLUMNS.EMAIL];
-  const nombre = data[COLUMNS.FULL_NAME];
-  const titulo = data[COLUMNS.TITLE];
+const sendFirstReminder = (dataItems, rowNumbers) => {
+  const firstItem = dataItems[0];
+  const email = firstItem[COLUMNS.EMAIL];
+  const nombre = firstItem[COLUMNS.FULL_NAME];
+
+  // Combinar títulos de todos los libros
+  const titulos = dataItems.map(item => item[COLUMNS.TITLE]);
 
   // Fecha de vencimiento = 1 día después de hoy
   const tomorrow = new Date();
@@ -114,7 +121,7 @@ const sendFirstReminder = (data, rowNumber) => {
   template.CAMPUS = EMAIL_CONFIG.CAMPUS_NAME;
   template.MES = mes;
   template.FECHA_VENCIMIENTO = fechaVencimiento;
-  template.LIBROS = formatBookList(titulo);
+  template.LIBROS = formatBookList(titulos);
   template.URL_IMAGEN_BUZON = EMAIL_CONFIG.MAILBOX_IMAGE_URL;
 
   const subject = `Hub ${EMAIL_CONFIG.CAMPUS_NAME} | ⚠️ ¡Atención! Tienes un libro pendiente para devolver ⚠️ 1er recordatorio`;
@@ -122,10 +129,11 @@ const sendFirstReminder = (data, rowNumber) => {
   const htmlBody = template.evaluate().getContent();
 
   if (sendEmail(email, subject, htmlBody)) {
-    const currentLog = SHEETS.overdueItems
-      .getRange(rowNumber, COLUMNS.LOG + 1)
-      .getValue();
-    updateActionLog(rowNumber, "✉️ Primer recordatorio enviado", currentLog);
+    // Actualizar log de TODOS los registros
+    rowNumbers.forEach((rowNumber) => {
+      const currentLog = SHEETS.overdueItems.getRange(rowNumber, COLUMNS.LOG + 1).getValue();
+      updateActionLog(rowNumber, "✉️ Primer recordatorio enviado", currentLog);
+    });
   } else {
     showToast(
       `No se pudo enviar correo a ${nombre}`,
@@ -138,13 +146,16 @@ const sendFirstReminder = (data, rowNumber) => {
 
 /**
  * Envía segundo recordatorio al deudor (tono más urgente)
- * @param {Array} data - Datos del registro
- * @param {number} rowNumber - Número de fila
+ * @param {Array<Array>} dataItems - Array de registros del mismo usuario
+ * @param {Array<number>} rowNumbers - Array de números de fila
  */
-const sendSecondReminder = (data, rowNumber) => {
-  const email = data[COLUMNS.EMAIL];
-  const nombre = data[COLUMNS.FULL_NAME];
-  const titulo = data[COLUMNS.TITLE];
+const sendSecondReminder = (dataItems, rowNumbers) => {
+  const firstItem = dataItems[0];
+  const email = firstItem[COLUMNS.EMAIL];
+  const nombre = firstItem[COLUMNS.FULL_NAME];
+
+  // Combinar títulos de todos los libros
+  const titulos = dataItems.map(item => item[COLUMNS.TITLE]);
 
   // Fecha de vencimiento = 1 día después de hoy
   const tomorrow = new Date();
@@ -156,7 +167,7 @@ const sendSecondReminder = (data, rowNumber) => {
   template.NOMBRE = nombre;
   template.CAMPUS = EMAIL_CONFIG.CAMPUS_NAME;
   template.FECHA_VENCIMIENTO = fechaVencimiento;
-  template.LIBROS = formatBookList(titulo);
+  template.LIBROS = formatBookList(titulos);
   template.URL_IMAGEN_BUZON = EMAIL_CONFIG.MAILBOX_IMAGE_URL;
 
   const subject = `Hub ${EMAIL_CONFIG.CAMPUS_NAME} | ⚠️ ¡Atención! Aún tienes un libro pendiente por devolver ⚠️ 2do recordatorio`;
@@ -164,38 +175,49 @@ const sendSecondReminder = (data, rowNumber) => {
   const htmlBody = template.evaluate().getContent();
 
   if (sendEmail(email, subject, htmlBody)) {
-    const currentLog = SHEETS.overdueItems
-      .getRange(rowNumber, COLUMNS.LOG + 1)
-      .getValue();
-    updateActionLog(rowNumber, "⚠️ Segundo recordatorio enviado", currentLog);
+    // Actualizar log de TODOS los registros
+    rowNumbers.forEach((rowNumber) => {
+      const currentLog = SHEETS.overdueItems.getRange(rowNumber, COLUMNS.LOG + 1).getValue();
+      updateActionLog(rowNumber, "⚠️ Segundo recordatorio enviado", currentLog);
+    });
   }
 };
 
 /**
  * Envía aviso de recarga (penalización)
- * @param {Array} data - Datos del registro
- * @param {number} rowNumber - Número de fila
+ * @param {Array<Array>} dataItems - Array de registros del mismo usuario
+ * @param {Array<number>} rowNumbers - Array de números de fila
  */
-const sendRechargeNotice = (data, rowNumber) => {
-  const email = data[COLUMNS.EMAIL];
-  const nombre = data[COLUMNS.FULL_NAME];
-  const titulo = data[COLUMNS.TITLE];
-  const fechaVencimiento = formatDate(data[COLUMNS.DUE_DATE]);
-  const costo = data[COLUMNS.COST] || "S/ 0.00";
+const sendRechargeNotice = (dataItems, rowNumbers) => {
+  const firstItem = dataItems[0];
+  const email = firstItem[COLUMNS.EMAIL];
+  const nombre = firstItem[COLUMNS.FULL_NAME];
 
-  // Fecha límite = valor de la columna "Fecha de recargo a la boleta"
-  // formatDate maneja el formato dd/mm/yyyy directamente
-  const fechaLimiteValue = data[COLUMNS.RECHARGE_DATE] || "";
+  // Combinar títulos de todos los libros
+  const titulos = dataItems.map(item => item[COLUMNS.TITLE]);
+
+  // Usar fecha de vencimiento del primer registro
+  const fechaVencimiento = formatDate(firstItem[COLUMNS.DUE_DATE]);
+
+  // Usar fecha límite del primer registro
+  const fechaLimiteValue = firstItem[COLUMNS.RECHARGE_DATE] || "";
   const fechaLimite = formatDate(fechaLimiteValue);
+
+  // Sumar costos (parsear texto a número)
+  const costos = dataItems.map(item => {
+    const costoStr = item[COLUMNS.COST] || "0.00";
+    return parseFloat(costoStr.replace(/[^\d.]/g, '')) || 0;
+  });
+  const totalCosto = costos.reduce((sum, c) => sum + c, 0);
 
   // Cargar y procesar plantilla HTML
   const template = HtmlService.createTemplateFromFile('templates/emailRechargeNotice');
   template.NOMBRE = nombre;
   template.CAMPUS = EMAIL_CONFIG.CAMPUS_NAME;
   template.FECHA_VENCIMIENTO = fechaVencimiento;
-  template.FECHA_LIMITE = formatDate(fechaLimite);
-  template.LIBROS = formatBookList(titulo);
-  template.MONTO = "S/ " + costo;
+  template.FECHA_LIMITE = fechaLimite;
+  template.LIBROS = formatBookList(titulos);
+  template.MONTO = `S/ ${totalCosto.toFixed(2)}`;
   template.URL_IMAGEN_BUZON = EMAIL_CONFIG.MAILBOX_IMAGE_URL;
 
   const subject = `Hub ${EMAIL_CONFIG.CAMPUS_NAME} | ⚠️ Aviso de recarga por devolución pendiente de libro`;
@@ -203,30 +225,40 @@ const sendRechargeNotice = (data, rowNumber) => {
   const htmlBody = template.evaluate().getContent();
 
   if (sendEmail(email, subject, htmlBody)) {
-    const currentLog = SHEETS.overdueItems
-      .getRange(rowNumber, COLUMNS.LOG + 1)
-      .getValue();
-    updateActionLog(rowNumber, "💳 Aviso de recarga enviado", currentLog);
+    // Actualizar log de TODOS los registros
+    rowNumbers.forEach((rowNumber) => {
+      const currentLog = SHEETS.overdueItems.getRange(rowNumber, COLUMNS.LOG + 1).getValue();
+      updateActionLog(rowNumber, "💳 Aviso de recarga enviado", currentLog);
+    });
   }
 };
 
 /**
  * Envía confirmación de pago de recarga
- * @param {Array} data - Datos del registro
- * @param {number} rowNumber - Número de fila
+ * @param {Array<Array>} dataItems - Array de registros del mismo usuario
+ * @param {Array<number>} rowNumbers - Array de números de fila
  */
-const sendRechargeConfirmation = (data, rowNumber) => {
-  const email = data[COLUMNS.EMAIL];
-  const nombre = data[COLUMNS.FULL_NAME];
-  const titulo = data[COLUMNS.TITLE];
-  const costo = data[COLUMNS.COST] || "S/ 0.00";
+const sendRechargeConfirmation = (dataItems, rowNumbers) => {
+  const firstItem = dataItems[0];
+  const email = firstItem[COLUMNS.EMAIL];
+  const nombre = firstItem[COLUMNS.FULL_NAME];
+
+  // Combinar títulos de todos los libros
+  const titulos = dataItems.map(item => item[COLUMNS.TITLE]);
+
+  // Sumar costos (parsear texto a número)
+  const costos = dataItems.map(item => {
+    const costoStr = item[COLUMNS.COST] || "0.00";
+    return parseFloat(costoStr.replace(/[^\d.]/g, '')) || 0;
+  });
+  const totalCosto = costos.reduce((sum, c) => sum + c, 0);
 
   // Cargar y procesar plantilla HTML
   const template = HtmlService.createTemplateFromFile('templates/emailRechargeConfirmation');
   template.NOMBRE = nombre;
   template.CAMPUS = EMAIL_CONFIG.CAMPUS_NAME;
-  template.LIBROS = formatBookList(titulo);
-  template.MONTO = "S/ " + costo;
+  template.LIBROS = formatBookList(titulos);
+  template.MONTO = `S/ ${totalCosto.toFixed(2)}`;
   template.URL_IMAGEN_BUZON = EMAIL_CONFIG.MAILBOX_IMAGE_URL;
 
   const subject = `Hub ${EMAIL_CONFIG.CAMPUS_NAME} | ⚠️ Confirmación de recargo por devolución pendiente`;
@@ -234,9 +266,10 @@ const sendRechargeConfirmation = (data, rowNumber) => {
   const htmlBody = template.evaluate().getContent();
 
   if (sendEmail(email, subject, htmlBody)) {
-    const currentLog = SHEETS.overdueItems
-      .getRange(rowNumber, COLUMNS.LOG + 1)
-      .getValue();
-    updateActionLog(rowNumber, "✅ Confirmación de recarga enviada", currentLog);
+    // Actualizar log de TODOS los registros
+    rowNumbers.forEach((rowNumber) => {
+      const currentLog = SHEETS.overdueItems.getRange(rowNumber, COLUMNS.LOG + 1).getValue();
+      updateActionLog(rowNumber, "✅ Confirmación de recarga enviada", currentLog);
+    });
   }
 };

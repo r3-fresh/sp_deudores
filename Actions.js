@@ -165,6 +165,25 @@ const moveToTrackingItems = (rowsWithNumbers) => {
 };
 
 /**
+ * Agrupa items por ID Usuario para envío consolidado de correos
+ * @param {Array} batch - Array de items con misma acción
+ * @returns {Map} Map de userId -> array de items
+ */
+const groupByUserId = (batch) => {
+    const grouped = new Map();
+
+    batch.forEach(item => {
+        const userId = item.data[COLUMNS.USER_ID];
+        if (!grouped.has(userId)) {
+            grouped.set(userId, []);
+        }
+        grouped.get(userId).push(item);
+    });
+
+    return grouped;
+};
+
+/**
  * Ejecuta todas las acciones pendientes en la hoja "Préstamos vencidos"
  * 
  * FLUJO:
@@ -240,7 +259,7 @@ const executeActions = () => {
         // Si procesamos devoluciones primero, las referencias de fila
         // de las demás acciones quedarán obsoletas.
 
-        // PASO 1: Procesar envíos de correo (no modifica filas)
+        // PASO 1: Procesar envíos de correo agrupados por (usuario + acción)
         const emailActions = [
             ACTIONS.FIRST_REMINDER,
             ACTIONS.SECOND_REMINDER,
@@ -251,11 +270,18 @@ const executeActions = () => {
         emailActions.forEach((action) => {
             if (actionsBatch[action].length > 0) {
                 const batch = actionsBatch[action];
-                batch.forEach((item) => {
+                const groupedByUser = groupByUserId(batch); // Ya filtrado por acción
+
+                // Procesar cada usuario (enviar un solo correo por usuario)
+                groupedByUser.forEach((userItems, userId) => {
                     try {
-                        ACTION_MAP[action](item.data, item.rowNumber);
+                        const dataItems = userItems.map(item => item.data);
+                        const rowNumbers = userItems.map(item => item.rowNumber);
+
+                        // Llamar función de envío con arrays
+                        ACTION_MAP[action](dataItems, rowNumbers);
                     } catch (error) {
-                        console.error(`❌ Error procesando fila ${item.rowNumber}:`, error);
+                        console.error(`❌ Error procesando usuario ${userId}:`, error);
                     }
                 });
             }
