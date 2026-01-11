@@ -5,146 +5,107 @@
   <base target="_top">
 </head>
 
-<body>
-  <center>
-    <table
-      style="border-collapse:collapse;height:100%;margin:0px;padding:0px;width:100%;background-color:rgb(242, 242, 242);"
-      width="100%" height="100%" cellspacing="0" cellpadding="0" border="0" align="center">
-      <tbody>
-        <tr>
-          <td style="height:100%;padding:10px;width:100%;border-top:0px;" valign="top" align="center">
-            <table style="border-collapse:collapse;border:0px;max-width:600px;" width="100%" cellspacing="0"
-              cellpadding="0" border="0">
-              <tbody>
+<body style="margin: 0; padding: 0; font-family: Arial, Helvetica, sans-serif; background-color: #f2f2f2;">
+  <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #f2f2f2;">
+    <tr>
+      <td align="center" style="padding: 20px 10px;">
+        <table width="600" cellpadding="0" cellspacing="0" border="0"
+          style="background-color: #ffffff; max-width: 600px;">
+
+          <!-- Header -->
+          <tr>
+            <td align="center" style="padding: 30px 20px 20px 20px;">
+              <img
+                src="https://ci6.googleusercontent.com/proxy/h9njXK3mllYy_7gMz4cP0NM0BxxxRAQ5ioBxUdJYtmRv1hU1TSKJAaP584AykBcLNRJYOWbMuHYUF-QuDxeR7mO6OnxqnzarGgxD7KrJ-yEq2NCsjb2bW9jfqhdh9YxzU5Wz5p5cfYz6qqDybm1KzlxFs0XQdBT7ILg=s0-d-e1-ft"
+                alt="Hub de Información" width="80" height="auto" style="display: block; margin-bottom: 15px;">
+              <h1 style="margin: 0; font-size: 28px; color: #333333; font-weight: normal;">Hub de Información</h1>
+            </td>
+          </tr>
+
+          <!-- Subtitle -->
+          <tr>
+            <td align="center" style="padding: 20px; background-color: #ff3300; color: #ffffff;">
+              <h2 style="margin: 0; font-size: 22px; font-weight: bold;">Aviso de recarga</h2>
+            </td>
+          </tr>
+
+          <!-- Content -->
+          <tr>
+            <td style="padding: 30px 40px; color: #333333; font-size: 14px; line-height: 1.6;">
+
+              <p style="margin: 0 0 15px 0; font-size: 16px;"><strong>Estimado/a {{NOMBRE}},</strong></p>
+
+              <p style="margin: 0 0 15px 0;">Recibe un cordial saludo de parte del equipo del <strong>Hub Huancayo -
+                  Biblioteca</strong>.</p>
+
+              <p style="margin: 0 0 15px 0;">En comunicaciones anteriores se le informó que está pendiente la devolución
+                del siguiente libro:</p>
+
+              <div style="background-color: #fff9c4; border-left: 4px solid #fdd835; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0 0 10px 0; font-weight: bold; color: #827717;">📚 Libro(s) pendiente(s):</p>
+                <ul style="margin: 0; padding-left: 20px;">
+                  {{LIBROS}}
+                </ul>
+              </div>
+
+              <div style="background-color: #fff3e0; border-left: 4px solid #ff6b00; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0 0 10px 0; font-weight: bold; color: #e65100;">📅 Fecha de vencimiento:
+                  {{FECHA_VENCIMIENTO}}</p>
+                <p style="margin: 0;">La fecha de vencimiento de los libros fue el
+                  <strong>{{FECHA_VENCIMIENTO}}</strong>, por lo que agradeceríamos que pueda realizar la devolución a
+                  la brevedad posible.
+                </p>
+              </div>
+
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="margin: 20px 0;">
                 <tr>
-                  <td
-                    style="background:none 50% 50% / cover no-repeat rgb(255, 255, 255);border-top:0px;border-bottom:0px;padding-top:10px;padding-bottom:15px;"
-                    valign="top">
-                    <table style="min-width:100%;border-collapse:collapse;" width="100%" cellspacing="0" cellpadding="0"
-                      border="0">
-                      <tbody>
-                        <tr>
-                          <td style="padding:9px;" valign="top">
-                            <table style="min-width:100%;border-collapse:collapse;" width="100%" cellspacing="0"
-                              cellpadding="0" border="0" align="left">
-                              <tbody>
-                                <tr>
-                                  <td style="padding:0px 9px;" valign="top"><img alt="" src="https://ci6.googleusercontent.com/proxy/h9njXK3mllYy_7gMz4cP0NM0BxxxRAQ5ioBxUdJYtmRv1hU1TSKJAaP584AykBcLNRJYOWbMuHYUF-QuDxeR7mO6OnxqnzarGgxD7KrJ-yEq2NCsjb2bW9jfqhdh9YxzU5Wz5p5cfYz6qqDybm1KzlxFs0XQdBT7ILg=s0-d-e1-ft#https://gallery.mailchimp.com/656fbe8d69172395c3bfc518a/images/1aef640b-0bc8-4eea-84d5-74078777589a.png" style="max-width:85px;padding-bottom:0px;vertical-align:bottom;border:0px;height:auto;outline:none;display:inline;" width="85" align="left">
-                                  </td>
-                                  <td style="padding:0px 9px;text-align:right;">
-                                    <h2 style="margin:0px;font-size:2.5em;">Hub de Información</h2>
-                                  </td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
+                  <td align="center"
+                    style="background-color: #ffebee; border: 2px solid #ff6b00; border-radius: 8px; padding: 20px;">
+                    <p style="margin: 0 0 10px 0; font-weight: bold;">⚠️ AVISO IMPORTANTE</p>
+                    <p style="margin: 0 0 10px 0;">De no recibir los libros hasta el día
+                      <strong>{{FECHA_LIMITE}}</strong>, procederemos a cargar en su pensión:
+                    </p>
+                    <p style="margin: 10px 0; font-size: 24px; font-weight: bold; color: #c62828;">{{MONTO}}</p>
+                    <p style="margin: 0; font-size: 14px; color: #666666;">Por concepto de "Deuda de libros"</p>
                   </td>
                 </tr>
-                <tr>
-                  <td
-                    style="background:none 50% 50% / cover no-repeat rgb(90, 0, 170);border-top:0px;border-bottom:0px;padding-top:0px;padding-bottom:0px;"
-                    valign="top">
-                    <table style="min-width:100%;border-collapse:collapse;" width="100%" cellspacing="0" cellpadding="0"
-                      border="0">
-                      <tbody>
-                        <tr>
-                          <td style="padding-top:9px;" valign="top"></td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    style="background:none 50% 50% / cover no-repeat rgb(255, 255, 255);border-top:0px;border-bottom:0px;padding-top:5px;padding-bottom:5px;"
-                    valign="top">
-                    <table style="min-width:100%;border-collapse:collapse;" width="100%" cellspacing="0" cellpadding="0"
-                      border="0">
-                      <tbody>
-                        <tr>
-                          <td valign="top">
-                            <table style="min-width:100%;border-collapse:collapse;" width="100%" cellspacing="0"
-                              cellpadding="0" border="0" align="left">
-                              <tbody>
-                                <tr>
-                                  <td style="padding:9px 18px 0 18px;">
-                                    <table style="border-collapse:collapse;min-width:100%;" width="100%" cellspacing="0"
-                                      border="0">
-                                      <tbody>
-                                        <tr>
-                                          <td
-                                            style="padding:18px;font-family:Helvetica;word-break:break-word;color: rgb(33, 35, 34);font-size: 14px;line-height: 150%;"
-                                            valign="top">
-                                            <h2 style="text-align: center; margin-top: 0px; margin-bottom: 35px;">
-                                              📩 Confirmación de inscripción
-                                            </h2>
-                                            <p>
-                                              Hola
-                                              <?!= name ?>
-                                            </p>
-                                            <p>¡Gracias por tu interés en participar en nuestras actividades académicas!
-                                              Confirmamos tu inscripción en el siguiente evento:</p>
-                                            <p><b>📚 Conversatorio:</b> El papel de la lectura en la educación superior
-                                            </p>
-                                            <p><b>📅 Fecha:</b> miércoles, 23 de abril</p>
-                                            <p><b>🕓 Hora:</b> 3:00 p. m.</p>
-                                            <p><b>💻 Modalidad:</b> Virtual - vía Zoom</p>
-                                            <p><b>🔗 Enlace de acceso:</b> https://cutt.ly/9rfLOMjg</p>
-                                            <hr />
-                                            <p><b>🔔 Recomendaciones importantes:</b></p>
-                                            <ul style="text-align:justify;padding-left:10px;">
-                                              <li>Ingresa a la sala con al menos <b>5 minutos de anticipación</b> para evitar
-                                                contratiempos.</li>
-                                              <li>Conéctate utilizando tu <b>correo institucional</b>.</li>
-                                              <li>Mantén el micrófono en silencio durante la sesión, salvo indicación
-                                                del moderador.</li>
-                                              <li>Puedes realizar tus preguntas a los ponentes a través del <b>chat</b> de
-                                                Zoom.</li>
-                                              <li>Al finalizar el conversatorio, se compartirá un <b>formulario de
-                                                asistencia</b>. Este paso es <b>obligatorio</b> para recibir la constancia de
-                                                participación.</li>
-                                              <li>Asegúrate de registrar correctamente tus <b>nombres y apellidos completos</b>
-                                                en el formulario.</li>
-                                            </ul>
-                                            <div>
-                                              <p>📩 Las constancias serán enviadas por correo a quienes asistan
-                                                puntualmente y completen el formulario de asistencia de manera adecuada.
-                                                Revisa que tus datos estén correctos antes de enviarlo.
-                                              </p>
-                                              <p>👋 ¡Te esperamos!</p>
-                                            </div>
-                                            <div style="text-align: center;">
-                                              <p>Hub de Información - Actividades virtuales</p>
-                                            </div>
-                                          </td>
-                                        </tr>
-                                      </tbody>
-                                    </table>
-                                  </td>
-                                </tr>
-                              </tbody>
-                            </table>
-                          </td>
-                        </tr>
-                      </tbody>
-                    </table>
-                  </td>
-                </tr>
-                <tr>
-                  <td
-                    style="color: white;background: none 50% 50% / cover no-repeat rgb(90, 0, 170);border-top: 0px;border-bottom: 0px;padding-top: 10px;font-size: 12px;text-align: center;"
-                    valign="top"><br></td>
-                </tr>
-              </tbody>
-            </table>
-          </td>
-        </tr>
-      </tbody>
-    </table>
-  </center>
+              </table>
+
+              <div style="background-color: #e3f2fd; border-left: 4px solid #2196f3; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0;"><strong>💡 Recuerde:</strong> Puede evitar este cargo realizando la devolución de
+                  los materiales antes de la fecha límite mencionada.</p>
+              </div>
+
+              <div
+                style="background-color: #f8f9fa; border: 1px solid #dee2e6; border-radius: 5px; padding: 15px; margin: 20px 0; text-align: center;">
+                <p style="margin: 0 0 5px 0; font-weight: bold;">¿Tiene algún inconveniente?</p>
+                <p style="margin: 0; font-size: 13px;">No dude en contactarnos a través de nuestros canales de atención
+                  presencial y virtual.</p>
+              </div>
+
+              <p style="margin: 0 0 15px 0;">Quedamos atentos a sus comentarios.</p>
+
+              <p style="margin: 30px 0 0 0;">
+                Saludos cordiales,<br>
+                <strong>Hub de Información - Biblioteca UC Continental</strong>
+              </p>
+            </td>
+          </tr>
+
+          <!-- Footer -->
+          <tr>
+            <td align="center" style="padding: 20px; background-color: #333333; color: #ffffff; font-size: 12px;">
+              <p style="margin: 0 0 5px 0; font-weight: bold;">Hub de Información - Universidad Continental</p>
+              <p style="margin: 0 0 10px 0;">Huancayo - Perú</p>
+              <p style="margin: 0; font-size: 11px;">Este es un mensaje automático, por favor no responder directamente
+                a este correo.</p>
+            </td>
+          </tr>
+
+        </table>
+      </td>
+    </tr>
+  </table>
 </body>
 
 </html>

@@ -3,7 +3,7 @@
 // ========================================
 
 /**
- * Envía un correo electrónico genérico
+ * Envía un correo electrónico usando plantilla HTML
  * @param {string} to - Dirección de correo del destinatario
  * @param {string} subject - Asunto del correo
  * @param {string} htmlBody - Cuerpo del correo en HTML
@@ -16,10 +16,10 @@ const sendEmail = (to, subject, htmlBody) => {
       return false;
     }
 
-    // GmailApp.sendEmail(to, subject, "", {
-    //   htmlBody: htmlBody,
-    //   name: "Hub de Información - UC Continental",
-    // });
+    GmailApp.sendEmail(to, subject, "", {
+      htmlBody: htmlBody,
+      name: "Hub de Información - UC Continental",
+    });
 
     console.log(`✅ Email enviado a ${to}: ${subject}`);
     return true;
@@ -30,56 +30,39 @@ const sendEmail = (to, subject, htmlBody) => {
 };
 
 /**
- * Crea el cuerpo HTML básico para un recordatorio
- * @param {Object} data - Datos del préstamo y deudor
- * @returns {string} HTML del correo
+ * Obtiene el nombre del mes en español
+ * @param {Date} date - Fecha
+ * @returns {string} Nombre del mes
  */
-const createReminderEmailBody = (data) => {
-  const nombre = data[COLUMNS.NAME];
-  const apellido = data[COLUMNS.LASTNAME];
-  const titulo = data[COLUMNS.TITLE];
-  const biblioteca = data[COLUMNS.LIBRARY];
-  const fechaVencimiento = data[COLUMNS.DUE_DATE];
+const getMonthName = (date) => {
+  const months = [
+    "enero", "febrero", "marzo", "abril", "mayo", "junio",
+    "julio", "agosto", "septiembre", "octubre", "noviembre", "diciembre"
+  ];
+  return months[date.getMonth()];
+};
 
-  return `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #5A00AA; color: white; padding: 20px; text-align: center; }
-        .content { background-color: #f9f9f9; padding: 20px; }
-        .footer { text-align: center; margin-top: 20px; font-size: 12px; color: #666; }
-        .highlight { background-color: #fff3cd; padding: 10px; border-left: 4px solid #ffc107; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h2>📚 Hub de Información - UC Continental</h2>
-        </div>
-        <div class="content">
-          <p>Hola <strong>${nombre} ${apellido}</strong>,</p>
-          <p>Te recordamos que tienes un recurso pendiente de devolución:</p>
-          
-          <div class="highlight">
-            <p><strong>📖 Recurso:</strong> ${titulo}</p>
-            <p><strong>📍 Biblioteca:</strong> ${biblioteca}</p>
-            <p><strong>📅 Fecha de vencimiento:</strong> ${fechaVencimiento}</p>
-          </div>
-          
-          <p>Por favor, realiza la devolución a la brevedad posible para evitar sanciones.</p>
-          <p><strong>Importante:</strong> Si ya devolviste este recurso, ignora este mensaje.</p>
-        </div>
-        <div class="footer">
-          <p>Hub de Información - Universidad Continental</p>
-          <p>Este es un mensaje automático, por favor no responder.</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
+/**
+ * Formatea una fecha en formato dd/mm/yyyy
+ * @param {Date|string} date - Fecha a formatear
+ * @returns {string} Fecha formateada
+ */
+const formatDate = (date) => {
+  if (!date) return "";
+  const d = typeof date === 'string' ? new Date(date) : date;
+  const day = String(d.getDate()).padStart(2, '0');
+  const month = String(d.getMonth() + 1).padStart(2, '0');
+  const year = d.getFullYear();
+  return `${day}/${month}/${year}`;
+};
+
+/**
+ * Formatea lista de libros como HTML
+ * @param {string} bookTitle - Título del libro
+ * @returns {string} HTML con el libro
+ */
+const formatBookList = (bookTitle) => {
+  return `<li>${bookTitle}</li>`;
 };
 
 /**
@@ -89,11 +72,23 @@ const createReminderEmailBody = (data) => {
  */
 const sendFirstReminder = (data, rowNumber) => {
   const email = data[COLUMNS.EMAIL];
-  const nombre = data[COLUMNS.NAME];
-  const subject = "📚 Recordatorio: Devolución de recurso pendiente";
-  const body = createReminderEmailBody(data);
+  const nombre = data[COLUMNS.FULL_NAME];
+  const titulo = data[COLUMNS.TITLE];
+  const fechaVencimiento = formatDate(data[COLUMNS.DUE_DATE]);
+  const mes = getMonthName(new Date(data[COLUMNS.DUE_DATE]));
 
-  if (sendEmail(email, subject, body)) {
+  // Cargar plantilla HTML
+  const template = HtmlService.createTemplateFromFile('templates/emailFirstReminder');
+  template.NOMBRE = nombre;
+  template.MES = mes;
+  template.FECHA_VENCIMIENTO = fechaVencimiento;
+  template.LIBROS = formatBookList(titulo);
+  template.URL_IMAGEN_BUZON = "https://hubinformacion.continental.edu.pe/web/wp-content/uploads/2026/01/buzones-hyo.png";
+
+  const subject = "Hub Huancayo | 🚨 ¡Atención! Tienes un libro pendiente para devolver ⚠️ 1er recordatorio";
+  const htmlBody = template.evaluate().getContent();
+
+  if (sendEmail(email, subject, htmlBody)) {
     const currentLog = SHEETS.overdueItems
       .getRange(rowNumber, COLUMNS.LOG + 1)
       .getValue();
@@ -109,53 +104,27 @@ const sendFirstReminder = (data, rowNumber) => {
 };
 
 /**
- * Envía segundo recordatorio al deudor (tono más firme)
+ * Envía segundo recordatorio al deudor (tono más urgente)
  * @param {Array} data - Datos del registro
  * @param {number} rowNumber - Número de fila
  */
 const sendSecondReminder = (data, rowNumber) => {
   const email = data[COLUMNS.EMAIL];
-  const nombre = data[COLUMNS.NAME];
-  const apellido = data[COLUMNS.LASTNAME];
+  const nombre = data[COLUMNS.FULL_NAME];
   const titulo = data[COLUMNS.TITLE];
-  const fechaVencimiento = data[COLUMNS.DUE_DATE];
+  const fechaVencimiento = formatDate(data[COLUMNS.DUE_DATE]);
 
-  const subject = "⚠️ URGENTE: Segundo recordatorio - Devolución pendiente";
-  const body = `
-    <!DOCTYPE html>
-    <html>
-    <head>
-      <style>
-        body { font-family: Arial, sans-serif; line-height: 1.6; color: #333; }
-        .container { max-width: 600px; margin: 0 auto; padding: 20px; }
-        .header { background-color: #dc3545; color: white; padding: 20px; text-align: center; }
-        .content { background-color: #f9f9f9; padding: 20px; }
-        .warning { background-color: #f8d7da; padding: 15px; border-left: 4px solid #dc3545; margin: 15px 0; }
-      </style>
-    </head>
-    <body>
-      <div class="container">
-        <div class="header">
-          <h2>⚠️ SEGUNDO RECORDATORIO</h2>
-        </div>
-        <div class="content">
-          <p>Estimado/a <strong>${nombre} ${apellido}</strong>,</p>
-          <p>Este es nuestro <strong>segundo recordatorio</strong> sobre el siguiente recurso pendiente:</p>
-          
-          <div class="warning">
-            <p><strong>📖 Recurso:</strong> ${titulo}</p>
-            <p><strong>📅 Venció el:</strong> ${fechaVencimiento}</p>
-          </div>
-          
-          <p><strong>Es necesario que realices la devolución de inmediato</strong> para evitar sanciones académicas.</p>
-          <p>Si tienes algún inconveniente, por favor comunícate con nosotros.</p>
-        </div>
-      </div>
-    </body>
-    </html>
-  `;
+  // Cargar plantilla HTML
+  const template = HtmlService.createTemplateFromFile('templates/emailSecondReminder');
+  template.NOMBRE = nombre;
+  template.FECHA_VENCIMIENTO = fechaVencimiento;
+  template.LIBROS = formatBookList(titulo);
+  template.URL_IMAGEN_BUZON = ""; // Usuario agregará el enlace
 
-  if (sendEmail(email, subject, body)) {
+  const subject = "Hub Huancayo | 🚨 ¡Atención! Aún tienes un libro pendiente por devolver ⚠️ 2do recordatorio";
+  const htmlBody = template.evaluate().getContent();
+
+  if (sendEmail(email, subject, htmlBody)) {
     const currentLog = SHEETS.overdueItems
       .getRange(rowNumber, COLUMNS.LOG + 1)
       .getValue();
@@ -170,10 +139,27 @@ const sendSecondReminder = (data, rowNumber) => {
  */
 const sendRechargeNotice = (data, rowNumber) => {
   const email = data[COLUMNS.EMAIL];
-  const subject = "💳 Aviso de recarga por mora en devolución";
-  const body = createReminderEmailBody(data); // TODO: Personalizar para recarga
+  const nombre = data[COLUMNS.FULL_NAME];
+  const titulo = data[COLUMNS.TITLE];
+  const fechaVencimiento = formatDate(data[COLUMNS.DUE_DATE]);
+  const costo = data[COLUMNS.COST] || "S/ 0.00"; // Obtener costo o valor por defecto
 
-  if (sendEmail(email, subject, body)) {
+  // Calcular fecha límite (por ejemplo, 3 días después de hoy)
+  const fechaLimite = new Date();
+  fechaLimite.setDate(fechaLimite.getDate() + 3);
+
+  // Cargar plantilla HTML
+  const template = HtmlService.createTemplateFromFile('templates/emailRechargeNotice');
+  template.NOMBRE = nombre;
+  template.FECHA_VENCIMIENTO = fechaVencimiento;
+  template.FECHA_LIMITE = formatDate(fechaLimite);
+  template.LIBROS = formatBookList(titulo);
+  template.MONTO = costo;
+
+  const subject = "Hub Huancayo | 🚨 Aviso de recarga por devolución pendiente de libro";
+  const htmlBody = template.evaluate().getContent();
+
+  if (sendEmail(email, subject, htmlBody)) {
     const currentLog = SHEETS.overdueItems
       .getRange(rowNumber, COLUMNS.LOG + 1)
       .getValue();
@@ -188,10 +174,21 @@ const sendRechargeNotice = (data, rowNumber) => {
  */
 const sendRechargeConfirmation = (data, rowNumber) => {
   const email = data[COLUMNS.EMAIL];
-  const subject = "✅ Confirmación de pago de recarga";
-  const body = createReminderEmailBody(data); // TODO: Personalizar para confirmación
+  const nombre = data[COLUMNS.FULL_NAME];
+  const titulo = data[COLUMNS.TITLE];
+  const costo = data[COLUMNS.COST] || "S/ 0.00";
 
-  if (sendEmail(email, subject, body)) {
+  // Cargar plantilla HTML
+  const template = HtmlService.createTemplateFromFile('templates/emailRechargeConfirmation');
+  template.NOMBRE = nombre;
+  template.LIBROS = formatBookList(titulo);
+  template.MONTO = costo;
+  template.URL_IMAGEN_BUZON = "https://hubinformacion.continental.edu.pe/web/wp-content/uploads/2026/01/buzones-hyo.png";
+
+  const subject = "Hub Huancayo | 🚨 Confirmación de recargo por devolución pendiente";
+  const htmlBody = template.evaluate().getContent();
+
+  if (sendEmail(email, subject, htmlBody)) {
     const currentLog = SHEETS.overdueItems
       .getRange(rowNumber, COLUMNS.LOG + 1)
       .getValue();
