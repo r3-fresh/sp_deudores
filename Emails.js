@@ -21,10 +21,8 @@ const sendEmail = (to, subject, htmlBody) => {
       name: "Hub de Información - UC Continental",
     });
 
-    console.log(`✅ Email enviado a ${to}: ${subject}`);
     return true;
   } catch (error) {
-    console.error(`❌ Error enviando email a ${to}:`, error);
     return false;
   }
 };
