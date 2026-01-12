@@ -108,5 +108,24 @@ const STATUS = {
  */
 const EMAIL_CONFIG = {
     CAMPUS_NAME: "Huancayo",  // Nombre del campus para asuntos de correo
-    MAILBOX_IMAGE_URL: "https://hubinformacion.continental.edu.pe/web/wp-content/uploads/2026/01/buzones-hyo.png",     // URL de la imagen del buzón (agregar por el usuario)
+    MAILBOX_IMAGE_URL: "https://hubinformacion.continental.edu.pe/web/wp-content/uploads/2026/01/buzones-hyo.png",
+
+    // Ubicaciones de entrega (HTML)
+    DELIVERY_LOCATIONS: `
+                <li style="margin: 5px 0;">Módulos de atención del Hub</li>
+                <li style="margin: 5px 0;">Buzón de devoluciones - Segundo piso (ingreso)</li>
+                <li style="margin: 5px 0;">Buzón de devoluciones - Tercer piso (cerca al módulo de atención)</li>`,
+
+    // Pie de imagen del buzón
+    MAILBOX_IMAGE_CAPTION: "Foto del buzón de devoluciones - Piso 2 y piso 3 del pabellón F",
+
+    // Horarios de atención (HTML)
+    OFFICE_HOURS: `
+        <p style="margin: 0 0 3px 0; padding-left: 20px;">Lunes a viernes: 7:30 a. m. a 9:00 p. m.</p>
+        <p style="margin: 0 0 3px 0; padding-left: 20px;">Sábados: 8:00 a. m. a 8:00 p. m.</p>
+        <p style="margin: 0 0 10px 0; padding-left: 20px;">Domingos: 9:00 a. m. a 4:00 p. m.</p>`,
+
+    // Información de contacto
+    PHONE_NUMBER: "064-481430 Anexo: 7862",
+    WHATSAPP_URL: "https://api.whatsapp.com/send?phone=51989149401&text=Hola+Hub+de+In%20formaci%C3%B3n,+mi%20nombre+es+_______+y+mi+c%C3%B3digo+es+______%20_,+necesito+ayuda+con+una+b%C3%BAsqueda+de+informaci%C3%B3n",
 };

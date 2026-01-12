@@ -69,10 +69,8 @@
                   brevedad posible para evitar que se recargue la cotización en tu pensión.</strong></p>
 
               <p style="margin: 0 0 10px 0; font-weight: bold;">Puedes entregar los libros en:</p>
-              <ul style="margin: 0 0 15px 0; padding-left: 20px;">
-                <li style="margin: 5px 0;">Módulos de atención del Hub</li>
-                <li style="margin: 5px 0;">Buzón de devoluciones - Segundo piso (ingreso)</li>
-                <li style="margin: 5px 0;">Buzón de devoluciones - Tercer piso (cerca al ascensor)</li>
+              <ul style="margin: 10px 0; padding-left: 20px; list-style-type: disc;">
+                <?!= DELIVERY_LOCATIONS ?>
               </ul>
 
               <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin: 20px 0;">
@@ -87,7 +85,8 @@
                       style="max-width: 100%; height: auto; display: block; border-radius: 8px;">
                     <p
                       style="margin: 8px 0 0 0; font-size: 12px; color: #666666; font-style: italic; text-align: center;">
-                      Foto del buzón de devoluciones - Piso 2 y piso 3 del pabellón F</p>
+                      <?= MAILBOX_IMAGE_CAPTION ?>
+                    </p>
                   </td>
                 </tr>
               </table>
@@ -121,13 +120,11 @@
         </p>
 
         <p style="margin: 0 0 5px 0;">➡️ <strong>Horario de atención presencial:</strong></p>
-        <p style="margin: 0 0 3px 0; padding-left: 20px;">Lunes a viernes: 7:30 a. m. a 9:00 p. m.</p>
-        <p style="margin: 0 0 3px 0; padding-left: 20px;">Sábados: 8:00 a. m. a 8:00 p. m.</p>
-        <p style="margin: 0 0 10px 0; padding-left: 20px;">Domingos: 9:00 a. m. a 4:00 p. m.</p>
+        <?!= OFFICE_HOURS ?>
 
-        <p style="margin: 0 0 10px 0;">➡️ <strong>064-481430 Anexo: 7862</strong> | <a
-            href="https://api.whatsapp.com/send?phone=51989149401&text=Hola+Hub+de+In%20formaci%C3%B3n,+mi%20nombre+es+_______+y+mi+c%C3%B3digo+es+______%20_,+necesito+ayuda+con+una+b%C3%BAsqueda+de+informaci%C3%B3n"
-            style="color: #25D366; text-decoration: none;">WhatsApp</a></p>
+        <p style="margin: 0 0 10px 0;">➡️ <strong>
+            <?= PHONE_NUMBER ?>
+          </strong> | <a href="<?= WHATSAPP_URL ?>" style="color: #25D366; text-decoration: none;">WhatsApp</a></p>
 
         <p style="margin: 0 0 5px 0;">Revisa nuestras actividades presenciales <a
             href="https://hubinformacion.continental.edu.pe/actividades-hub/"

@@ -121,6 +121,11 @@ const sendFirstReminder = (dataItems, rowNumbers) => {
   template.FECHA_VENCIMIENTO = fechaVencimiento;
   template.LIBROS = formatBookList(titulos);
   template.URL_IMAGEN_BUZON = EMAIL_CONFIG.MAILBOX_IMAGE_URL;
+  template.DELIVERY_LOCATIONS = EMAIL_CONFIG.DELIVERY_LOCATIONS;
+  template.MAILBOX_IMAGE_CAPTION = EMAIL_CONFIG.MAILBOX_IMAGE_CAPTION;
+  template.OFFICE_HOURS = EMAIL_CONFIG.OFFICE_HOURS;
+  template.PHONE_NUMBER = EMAIL_CONFIG.PHONE_NUMBER;
+  template.WHATSAPP_URL = EMAIL_CONFIG.WHATSAPP_URL;
 
   const subject = `Hub ${EMAIL_CONFIG.CAMPUS_NAME} | ⚠️ ¡Atención! Tienes un libro pendiente para devolver ⚠️ 1er recordatorio`;
 
@@ -167,6 +172,11 @@ const sendSecondReminder = (dataItems, rowNumbers) => {
   template.FECHA_VENCIMIENTO = fechaVencimiento;
   template.LIBROS = formatBookList(titulos);
   template.URL_IMAGEN_BUZON = EMAIL_CONFIG.MAILBOX_IMAGE_URL;
+  template.DELIVERY_LOCATIONS = EMAIL_CONFIG.DELIVERY_LOCATIONS;
+  template.MAILBOX_IMAGE_CAPTION = EMAIL_CONFIG.MAILBOX_IMAGE_CAPTION;
+  template.OFFICE_HOURS = EMAIL_CONFIG.OFFICE_HOURS;
+  template.PHONE_NUMBER = EMAIL_CONFIG.PHONE_NUMBER;
+  template.WHATSAPP_URL = EMAIL_CONFIG.WHATSAPP_URL;
 
   const subject = `Hub ${EMAIL_CONFIG.CAMPUS_NAME} | ⚠️ ¡Atención! Aún tienes un libro pendiente por devolver ⚠️ 2do recordatorio`;
 
@@ -217,6 +227,10 @@ const sendRechargeNotice = (dataItems, rowNumbers) => {
   template.LIBROS = formatBookList(titulos);
   template.MONTO = `S/ ${totalCosto.toFixed(2)}`;
   template.URL_IMAGEN_BUZON = EMAIL_CONFIG.MAILBOX_IMAGE_URL;
+  template.MAILBOX_IMAGE_CAPTION = EMAIL_CONFIG.MAILBOX_IMAGE_CAPTION;
+  template.OFFICE_HOURS = EMAIL_CONFIG.OFFICE_HOURS;
+  template.PHONE_NUMBER = EMAIL_CONFIG.PHONE_NUMBER;
+  template.WHATSAPP_URL = EMAIL_CONFIG.WHATSAPP_URL;
 
   const subject = `Hub ${EMAIL_CONFIG.CAMPUS_NAME} | ⚠️ Aviso de recarga por devolución pendiente de libro`;
 
@@ -258,6 +272,11 @@ const sendRechargeConfirmation = (dataItems, rowNumbers) => {
   template.LIBROS = formatBookList(titulos);
   template.MONTO = `S/ ${totalCosto.toFixed(2)}`;
   template.URL_IMAGEN_BUZON = EMAIL_CONFIG.MAILBOX_IMAGE_URL;
+  template.DELIVERY_LOCATIONS = EMAIL_CONFIG.DELIVERY_LOCATIONS;
+  template.MAILBOX_IMAGE_CAPTION = EMAIL_CONFIG.MAILBOX_IMAGE_CAPTION;
+  template.OFFICE_HOURS = EMAIL_CONFIG.OFFICE_HOURS;
+  template.PHONE_NUMBER = EMAIL_CONFIG.PHONE_NUMBER;
+  template.WHATSAPP_URL = EMAIL_CONFIG.WHATSAPP_URL;
 
   const subject = `Hub ${EMAIL_CONFIG.CAMPUS_NAME} | ⚠️ Confirmación de recargo por devolución pendiente`;
 
