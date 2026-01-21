@@ -30,7 +30,7 @@
 
           <!-- Subtitle -->
           <tr>
-            <td align="center" style="padding: 20px; background-color: #dc3545; color: #ffffff;">
+            <td align="center" style="padding: 20px; background-color: #000000; color: #ffffff;">
               <h2 style="margin: 0; font-size: 26px; font-weight: bold;">Segundo recordatorio</h2>
             </td>
           </tr>
@@ -46,15 +46,15 @@
               <p style="margin: 0 0 15px 0;">Recibe un cordial saludo de parte del equipo del <strong>Hub
                   <?= CAMPUS ?> - Biblioteca.</strong></p>
 
-              <div style="background-color: #f8d7da; border-left: 4px solid #dc3545; padding: 15px; margin: 20px 0;">
-                <p style="margin: 0 0 10px 0; font-weight: bold; color: #721c24;">⚠️ ÚLTIMO DÍA PARA DEVOLUCIÓN</p>
-                <p style="margin: 0; font-size: 16px;">Te recordamos que <strong>
+              <div style="background-color: #ECE9FF; border-left: 4px solid #5A00AA; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0 0 10px 0; font-weight: bold;">⚠️ Último día para devolución</p>
+                <p style="margin: 0;">Te recordamos que <strong>
                     <?= FECHA_VENCIMIENTO ?>
                   </strong> es el último día para devolver los libros prestados.</p>
               </div>
 
-              <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 15px; margin: 20px 0;">
-                <p style="margin: 0 0 10px 0; font-weight: bold; color: #856404;">⚠️ Libro(s) pendiente(s):</p>
+              <div style="background-color: #A6E1FF; border-left: 4px solid #0066cc; padding: 15px; margin: 20px 0;">
+                <p style="margin: 0 0 10px 0; font-weight: bold;">⚠️ Libro(s) pendiente(s):</p>
                 <ul style="margin: 0; padding-left: 20px;">
                   <?!= LIBROS ?>
                 </ul>
@@ -68,7 +68,7 @@
                 <?!= DELIVERY_LOCATIONS ?>
               </ul>
 
-              <div style="background-color: #fff3cd; border-left: 4px solid #ffc107; padding: 12px; margin: 20px 0;">
+              <div style="background-color: #FFF3CD; border-left: 4px solid #ffc107; padding: 12px; margin: 20px 0;">
                 <p style="margin: 0;"><strong>⚠️ Importante:</strong> Al momento de devolver el libro, ¡no olvides
                   comentárselo al bibliotecario!</p>
               </div>
@@ -94,39 +94,51 @@
             </td>
           </tr>
 
-          <!-- Footer -->
+          <!-- Footer con información de contacto integrada -->
           <tr>
-            <td align="center" style="padding: 20px; background-color: #333333; color: #ffffff; font-size: 12px;">
-              <p style="margin: 0 0 5px 0; font-weight: bold;">Hub de Información - Universidad Continental</p>
+            <td style="padding: 0;">
+              <table width="100%" cellpadding="0" cellspacing="0" border="0" style="background-color: #000000; color: #ffffff;">
+
+                <!-- Sección principal de contacto -->
+                <tr>
+                  <td style="padding: 25px 30px;">
+                    <table width="100%" cellpadding="0" cellspacing="0" border="0">
+                      <tr>
+                        <!-- Columna izquierda: Identidad y horarios -->
+                        <td valign="top" style="width: 50%; padding-right: 20px;">
+                          <p style="margin: 0 0 8px 0; font-size: 15px; font-weight: bold;">Hub de Información - <?= CAMPUS ?></p>
+                          <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: bold;">&#128197; Horario de atención presencial:</p>
+                          <div style="font-size: 12px; color: #cccccc; line-height: 1.5;">
+                            <?!= OFFICE_HOURS ?>
+                          </div>
+                        </td>
+
+                        <!-- Columna derecha: Contacto y enlaces -->
+                        <td valign="top" style="width: 50%; padding-left: 20px; border-left: 1px solid rgba(255,255,255,0.1);">
+                          <p style="margin: 0 0 8px 0; font-size: 13px; font-weight: bold;">&#128226; Contacto</p>
+                          <p style="margin: 0 0 10px 0; font-size: 12px; color: #cccccc;">
+                            <strong style="color: #ffffff;"><?= PHONE_NUMBER ?></strong> |
+                            <a href="<?= WHATSAPP_URL ?>" style="color: #25D366; text-decoration: none; font-weight: bold;">WhatsApp</a>
+                          </p>
+
+                          <p style="margin: 0 0 6px 0; font-size: 13px; font-weight: bold;">&#128279; Enlaces de interés</p>
+                          <p style="margin: 0 0 5px 0; font-size: 12px; color: #cccccc; padding-left: 20px;">
+                            • <a href="https://hubinformacion.continental.edu.pe/actividades-hub/" style="text-decoration: none; color: #cccccc;">Actividades presenciales</a>
+                          </p>
+                          <p style="margin: 0; font-size: 12px; color: #cccccc; padding-left: 20px;">
+                            • <a href="https://whatsapp.com/channel/0029VaZmxa60AgWBDHWAh82h" style="text-decoration: none; color: #cccccc;">Canal de Hub de Información</a>
+                          </p>
+                        </td>
+                      </tr>
+                    </table>
+                  </td>
+                </tr>
+
+              </table>
             </td>
           </tr>
 
         </table>
-      </td>
-    </tr>
-  </table>
-
-  <!-- Signature -->
-  <table width="100%" style="background-color: #ffffff;">
-    <tr>
-      <td style="padding: 20px 40px; color: #333333; font-size: 13px; line-height: 1.6;">
-        <p style="margin: 0 0 10px 0; font-weight: bold; font-size: 14px;">Hub de Información -
-          <?= CAMPUS ?>
-        </p>
-
-        <p style="margin: 0 0 5px 0;">➡️ <strong>Horario de atención presencial:</strong></p>
-        <?!= OFFICE_HOURS ?>
-
-        <p style="margin: 0 0 10px 0;">➡️ <strong>
-            <?= PHONE_NUMBER ?>
-          </strong> | <a href="<?= WHATSAPP_URL ?>" style="color: #25D366; text-decoration: none;">WhatsApp</a></p>
-
-        <p style="margin: 0 0 5px 0;">Revisa nuestras actividades presenciales <a
-            href="https://hubinformacion.continental.edu.pe/actividades-hub/"
-            style="color: #0066cc; text-decoration: none;">aquí</a>.</p>
-
-        <p style="margin: 0;">Únete al <a href="https://whatsapp.com/channel/0029VaZmxa60AgWBDHWAh82h"
-            style="color: #0066cc; text-decoration: none;">Canal de Hub de Información</a></p>
       </td>
     </tr>
   </table>
